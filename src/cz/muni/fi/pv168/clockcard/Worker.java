@@ -1,5 +1,9 @@
 package cz.muni.fi.pv168.clockcard;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +13,7 @@ import java.util.List;
  * @author Marek Osvald
  */
 
-public class Worker extends aPerson {
+public class Worker extends APerson {
     private Shift currentShift = null;
     private boolean suspended = false;
 
@@ -18,8 +22,13 @@ public class Worker extends aPerson {
      *
      * @return list of all workers in the database.
      */
-    public static List<Worker> all() {
-        //TODO implement
+    public static List<Worker> all() throws SQLException {
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/clockcard", "root", "root");
+        Statement statement = connection.createStatement();
+        boolean execute = statement.execute("SELECT * FROM workers");
+
+        //TODO: get rid of the throws
+
         return new ArrayList<Worker>();
     }
     /**
@@ -119,4 +128,9 @@ public class Worker extends aPerson {
         //TODO implement;
         return new ArrayList<Shift>() {};
     }
+
+/*    private Statement getStatement() throws SQLException {
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/clockcard", "root", "root");
+        return connection.createStatement();
+    }*/
 }

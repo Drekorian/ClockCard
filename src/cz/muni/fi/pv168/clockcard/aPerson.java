@@ -6,7 +6,7 @@ package cz.muni.fi.pv168.clockcard;
  * @author Marek Osvald
  */
 
-public abstract class aPerson {
+public abstract class APerson {
     private static String DEFAULT_PASSWORD;
     
     private long id;
@@ -20,7 +20,7 @@ public abstract class aPerson {
      *
      * @param person Person whose password is being reset.
      */
-    public static void resetForgtottenPassword(aPerson person) {
+    public static void resetForgtottenPassword(APerson person) {
         person.password = DEFAULT_PASSWORD;
     }
 
@@ -31,7 +31,7 @@ public abstract class aPerson {
      * @param surname surname of the person
      * @param login login of the person
      */
-    public aPerson(String name, String surname, String login) {
+    public APerson(String name, String surname, String login) {
         this.name = name;
         this.surname = surname;
         this.login = login;

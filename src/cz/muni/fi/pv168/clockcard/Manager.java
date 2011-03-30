@@ -12,7 +12,7 @@ import java.util.Map;
  * @author Marek Osvald
  */
 
-public class Manager extends aPerson {
+public class Manager extends APerson {
 
     /**
      * Parametric constructor.
