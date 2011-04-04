@@ -1,9 +1,6 @@
 package cz.muni.fi.pv168.clockcard;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,22 +10,38 @@ import java.util.List;
  * @author Marek Osvald
  */
 
-public class Worker extends APerson {
+public class Worker {
+    //TODO: Load default from the property file.
+    private static final String DEFAULT_PASSWORD = ""; // _DO NOT_ use this value.
+
+    private Long id;
+    private String name;
+    private String surname;
+    private String login;
+    private String password;
     private Shift currentShift = null;
     private boolean suspended = false;
 
+    /**
+     * Resets the password of the selected worker to the default value.
+     *
+     * @param worker worker whose password is being reset
+     */
+    public static void resetForgottenPassword(Worker worker) {
+        //worker.password = defaultPassword;
+    }
     /**
      * Returns lists of all workers in the database.
      *
      * @return list of all workers in the database.
      */
     public static List<Worker> all() throws SQLException {
-        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/clockcard", "root", "root");
+        /*Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/clockcard", "root", "root");
         Statement statement = connection.createStatement();
         boolean execute = statement.execute("SELECT * FROM workers");
 
         //TODO: get rid of the throws
-
+        */
         return new ArrayList<Worker>();
     }
     /**
@@ -52,7 +65,12 @@ public class Worker extends APerson {
         //TODO implement
         return 0; //_DO NOT_ USE THIS -- JUST A DUMMY VALUE
     }
-
+    /**
+     * Deletes matching record from the database.
+     */
+    public void destroy() {
+        //
+    }
     /**
      * Parametric constructor.
      * 
@@ -61,7 +79,54 @@ public class Worker extends APerson {
      * @param login login of the worker
      */
     Worker(String name, String surname, String login) {
-       super(name, surname, login);
+        this.name = name;
+        this.surname = surname;
+        this.login = login;
+        this.password = DEFAULT_PASSWORD;
+    }
+    /**
+     * Returns ID of the worker.
+     *
+     * @return id of the worker, null provided that the worker was not saved to the database yet.
+     */
+    public Long getID() {
+        return id;
+    }
+    /**
+     * Returns name of the worker.
+     *
+     * @return name of the worker
+     */
+    public String getName() {
+        return name;
+    }
+    /**
+     * Sets name of the worker.
+     *
+     * @param name name of the worker to be set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
     /**
      * Returns current pending shift.
@@ -70,6 +135,10 @@ public class Worker extends APerson {
      */
     public Shift getCurrentShift() {
         return currentShift;
+    }
+
+    public boolean authenticate(String password) {
+        return this.password.equals(password);
     }
 
     public void startShift() {
@@ -126,11 +195,6 @@ public class Worker extends APerson {
      */
     public List<Shift> getShifts() {
         //TODO implement;
-        return new ArrayList<Shift>() {};
+        return new ArrayList<Shift>();
     }
-
-/*    private Statement getStatement() throws SQLException {
-        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/clockcard", "root", "root");
-        return connection.createStatement();
-    }*/
 }

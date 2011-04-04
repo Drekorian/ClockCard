@@ -12,17 +12,14 @@ import java.util.Map;
  * @author Marek Osvald
  */
 
-public class Manager extends APerson {
+public class Manager {
+    private static final String PASSWORD = "";
+    //TODO: Load manager password from property file.
 
     /**
-     * Parametric constructor.
-     * 
-     * @param name name of the manager
-     * @param surname surname of the manager
-     * @param login login of the manager
+     * Parameterless constructor.
      */
-    Manager(String name, String surname, String login) {
-        super(name, surname, login);
+    Manager() {
     }
 
     public List<Worker> getWorkers() {
@@ -39,5 +36,23 @@ public class Manager extends APerson {
     public Map<Worker, Time> getWorkedTime() {
         //TODO implement (watch out for imports)
         return new HashMap<Worker, Time>();
+    }
+
+    /**
+     * Creates a new worker and saves him into a database.
+     *
+     * @param name name of the hired worker
+     * @param surname surname of the hired worker
+     * @param login login of the hired worker
+     */
+    public void hireWorker(String name, String surname, String login) {
+        //TODO: implement
+    }
+
+    /**
+     * Deletes a suspended worker from the database.
+     */
+    public void fireSuspendedWorker() {
+        //TODO: implement
     }
 }

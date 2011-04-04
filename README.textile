@@ -1,0 +1,8 @@
+h1. ClockCard
+
+p. ClockCard is a simple time tracking system written in Java SE. ClockCard was programmed as a semestral project for course PV168 Seminar in Java Programming taught in spring 2011.
+
+h2. Authors
+
+* Marek Osvald ("e-mail":mailto:325253@mail.muni.cz)
+* David Stein ("e-mail:":mailto:37....@mail.muni.cz)
