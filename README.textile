@@ -1,8 +1,62 @@
 h1. ClockCard
 
-p. ClockCard is a simple time tracking system written in Java SE. ClockCard was programmed as a semestral project for course PV168 Seminar in Java Programming taught in spring 2011.
+p. ClockCard is a simple time tracking system currently being written in Java SE. ClockCard is being programmed as a semestral project for course PV168 Seminar in Java Programming taught in spring 2011 at Faculty of Infortmatics, Masaryk's University in Brno.
 
 h2. Authors
 
 * Marek Osvald ("e-mail":mailto:325253@mail.muni.cz)
-* David Stein ("e-mail:":mailto:37....@mail.muni.cz)
+* David Stein ("e-mail:":mailto:fires@mail.muni.cz)
+
+h3. Tasks
+
+# UML diagrams
+## Use-case diagram (Marek) [100%] { 24. 2. - 2. 3. }
+## Class diagram (Marek) [100%] { 3. 3. - 9. 3. }
+# Test methods
+## Worker class test methods (Marek) [100%] { 10. 3. - 31. 3. }
+## Shift class test methods (David) [100%] { 10. 3. - 23. 3. }
+# Implementation of basic DB operations
+## Database preparation (David) [100%] { 24. 3. - 6. 4. }
+## Testing database preparation (?) [0%] { 31.3 - ? }
+## DB methods tests (?) [0%] { 31.3 - ? }
+### Worker class [0%]
+#### all() [x]
+#### find() [x]
+#### count() [x]
+#### save() [x]
+#### destroy() [x]
+### Shift class [0%]
+#### all() [x]
+#### find() [x]
+#### count() [x]
+#### save() [x]
+#### destroy() [x]
+## Implementation of DB methods (?) [0%] { 31.3 - ? }
+### Worker class [0%]
+#### all() [x]
+#### find() [x]
+#### count() [x]
+#### save() [x]
+#### destroy() [x]
+### Shift class [0%]
+#### all() [x]
+#### find() [x]
+#### count() [x]
+#### save() [x]
+#### destroy() [x]
+# Complete application logic, DataSource
+## Rewrite DB methods to comply with DataSource
+## Application logic
+### Worker
+### Shift
+### Manager
+
+h2. To-do list
+* Rewrite README
+** Timeline
+** Tracking report
+** To-Do List
+** Changelog
+* Diagrams
+** Export last version
+** Upload to Github
