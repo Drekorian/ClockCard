@@ -52,6 +52,7 @@ h3. Tasks
 ### Manager
 
 h2. To-do list
+
 * Rewrite README
 ** Timeline
 ** Tracking report
@@ -60,3 +61,4 @@ h2. To-do list
 * Diagrams
 ** Export last version
 ** Upload to Github
+
