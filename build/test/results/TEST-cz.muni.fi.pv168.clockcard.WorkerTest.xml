@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite errors="0" failures="0" hostname="Leia" name="cz.muni.fi.pv168.clockcard.WorkerTest" tests="6" time="3.373" timestamp="2011-04-07T14:19:31">
+<testsuite errors="0" failures="0" hostname="Leia" name="cz.muni.fi.pv168.clockcard.WorkerTest" tests="10" time="4.733" timestamp="2011-04-07T15:50:45">
   <properties>
     <property name="default.javac.source" value="1.6" />
     <property name="file.encoding.pkg" value="sun.io" />
@@ -272,11 +272,15 @@
     <property name="sun.arch.data.model" value="64" />
   </properties>
   <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testResetForgottenPassword" time="0.0030" />
-  <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testAll" time="1.728" />
-  <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testCount" time="0.402" />
-  <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testFind" time="0.381" />
-  <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testSave" time="0.375" />
-  <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testDestroy" time="0.376" />
+  <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testAll" time="2.752" />
+  <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testCount" time="0.415" />
+  <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testFind" time="0.572" />
+  <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testStartShift" time="0.0" />
+  <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testEndShift" time="0.0" />
+  <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testSuspend" time="0.0010" />
+  <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testUnsuspend" time="0.0010" />
+  <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testSave" time="0.438" />
+  <testcase classname="cz.muni.fi.pv168.clockcard.WorkerTest" name="testDestroy" time="0.39" />
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

@@ -27,13 +27,53 @@ public class Worker {
     private boolean suspended = false;
 
     /**
-     * Resets the password of the selected worker to the default value.
+     * Returns connection to the production or testing database.
      *
-     * @param worker worker whose password is being reset
+     * @return connection to the database.
      */
-    public static void resetForgottenPassword(Worker worker) {
-        worker.password = properties.getProperty("defaultPassword");
+    private static Connection getConnection() throws SQLException {
+       if (testingMode) {
+           return DriverManager.getConnection(properties.getProperty("testDatabase"),
+                                              properties.getProperty("testLogin"),
+                                              properties.getProperty("testPassword"));
+       }
+
+       return DriverManager.getConnection(properties.getProperty("productionDatabase"),
+                                          properties.getProperty("productionLogin"),
+                                          properties.getProperty("productionPassword"));
     }
+
+    
+    /**
+     * Loads properties from file.
+     *
+     * @return properties from the file
+     */
+    public static Properties loadProperties() {
+        try {
+            FileInputStream inputStream = new FileInputStream("src/Worker.properties");
+            Properties properties = new Properties();
+            properties.load(inputStream);
+            inputStream.close();
+            return properties;
+        } catch (IOException e) {
+            return new Properties();
+            //TODO: LOG fatal error, Property file not found.
+        }
+    }
+    /**
+     * Turns on the testin mode.
+     */
+    public static void testingOn() {
+        testingMode = true;
+    }
+    /**
+     * Turns off the tesing mode.
+     */
+    public static void testingOff() {
+        testingMode = false;
+    }
+
     /**
      * Returns lists of all workers in the database.
      *
@@ -103,70 +143,17 @@ public class Worker {
         connection.close();
         return result;
     }
-    /**
-     * Saves worker into the database. Executes INSERT when worker is saved for
-     * the first time, UPDATE otherwise.
-     *
-     * @return true when worker is successfuly saved, false otherwise
-     * @throws SQLException
-     */
-    public boolean save() throws SQLException {
-        Connection connection = getConnection();
-        PreparedStatement preparedStatement = null;
-
-        if (id == null) {
-            preparedStatement = connection.prepareStatement("INSERT INTO APP.workers (name, surname, login, password, current_shift, suspended) VALUES (?, ?, ?, ?, ?, ?)");
-        } else {
-            preparedStatement = connection.prepareStatement("UPDATE APP.workers SET name=?, surname=?, login=?, password=?, current_shift=?, suspended=? WHERE id=" + id);
-        }
         
-        preparedStatement.setString(1, name);
-        preparedStatement.setString(2, surname);
-        preparedStatement.setString(3, login);
-        preparedStatement.setString(4, password);
-        if (currentShift != null) {
-            preparedStatement.setLong(5, currentShift.getID());
-        } else {
-            preparedStatement.setNull(5, Types.INTEGER);
-        }
-        preparedStatement.setBoolean(6, suspended);
-        int result = preparedStatement.executeUpdate();
-        connection.close();
-
-        return (result > 0);
-    }
     /**
-     * Deletes matching record from the database. Provided that the selected
-     * worker has not been saved to the database yet, only returns false.
+     * Resets the password of the selected worker to the default value.
      *
-     * @return true when worker is successfuly deleted, false otherwise
+     * @param worker worker whose password is being reset
      */
-    public boolean destroy() throws SQLException {
-        if (id == null) {
-            return false;
-        }
-
-        Connection connection = getConnection();
-        Statement statement = connection.createStatement();
-        int result = statement.executeUpdate("DELETE FROM APP.workers WHERE id=" + id);
-        connection.close();
-
-        return (result == 1);
+    public static void resetForgottenPassword(Worker worker) {
+        worker.password = properties.getProperty("defaultPassword");
     }
-    /**
-     * Parametric constructor. This constructor is used for objects that have
-     * not been serialized into the database yet.
-     * 
-     * @param name name of the worker
-     * @param surname surname of the worker
-     * @param login login of the worker
-     */
-    public Worker(String name, String surname, String login) {
-        this.name = name;
-        this.surname = surname;
-        this.login = login;
-        this.password = properties.getProperty("defaultPassword");
-    }
+
+    
     /**
      * Parametric constructor. This constructor is used to recreate objects that
      * have been previuosly stored in the database.
@@ -187,6 +174,22 @@ public class Worker {
         this.login = login;
         this.currentShift = Shift.find(currentShift);
         this.suspended = suspended;
+    }
+
+    
+    /**
+     * Parametric constructor. This constructor is used for objects that have
+     * not been serialized into the database yet.
+     * 
+     * @param name name of the worker
+     * @param surname surname of the worker
+     * @param login login of the worker
+     */
+    public Worker(String name, String surname, String login) {
+        this.name = name;
+        this.surname = surname;
+        this.login = login;
+        this.password = properties.getProperty("defaultPassword");
     }
     /**
      * Returns ID of the worker.
@@ -273,15 +276,37 @@ public class Worker {
         
         return this.password.equals(password);
     }
+    /**
+     * Starts a new shift. Provided that worker is suspended or already has
+     * a pending shift throws a WorkerException.
+     *
+     * @throws WorkerException
+     */
+    public void startShift() throws WorkerException {
+        if (isSuspended()) {
+            throw new WorkerException("Suspended workers cannot start a new shift.");
+        }
 
-    public void startShift() {
-        //TODO implement
+        if (getCurrentShift() != null) {
+            throw new WorkerException("Worker already has a pending shift.");
+        }
+
+        currentShift = new Shift();
     }
+    /**
+     * Ends pending shift. Provided that worker is suspended or has not
+     * a pending shift throws a WorkerException.
+     *
+     * @throws WorkerException
+     */
+    public void endShift() throws WorkerException {
+        if (getCurrentShift() == null) {
+            throw new WorkerException("Worker has not a pending shift.");
+        }
 
-    public void endShift() {
-        //TODO implement
+        currentShift = null;
     }
-
+    
     public void startBreak() {
         //TODO implement
     }
@@ -303,11 +328,11 @@ public class Worker {
      * @throws WorkerException
      */
     public void suspend() throws WorkerException {
-        /*if (suspended) {
-            throw new WorkerException("Worker already suspended.");
-        } else {
-            suspended = true;
-        }*/
+        if (isSuspended()) {
+            throw new WorkerException("Worker is already suspended");
+        }
+
+        suspended = true;
     }
     /**
      * Cancels previous suspension.
@@ -315,11 +340,11 @@ public class Worker {
      * @throws WorkerException
      */
     public void unsuspend() throws WorkerException {
-        /*if (!suspended) {
+        if (!isSuspended()) {
             throw new WorkerException("Worker is not suspended.");
-        } else {
-            suspended = false;
-        }*/
+        }
+
+        suspended = false;
     }
     /**
      * Returns all shifts worked by worker.
@@ -327,8 +352,58 @@ public class Worker {
      * @return list of all shifts worked by worker
      */
     public List<Shift> getShifts() {
-        //TODO implement;
-        return new ArrayList<Shift>();
+        return Shift.findByWorker(id);
+    }
+
+    /**
+     * Saves worker into the database. Executes INSERT when worker is saved for
+     * the first time, UPDATE otherwise.
+     *
+     * @return true when worker is successfuly saved, false otherwise
+     * @throws SQLException
+     */
+    public boolean save() throws SQLException {
+        Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+
+        if (id == null) {
+            preparedStatement = connection.prepareStatement("INSERT INTO APP.workers (name, surname, login, password, current_shift, suspended) VALUES (?, ?, ?, ?, ?, ?)");
+        } else {
+            preparedStatement = connection.prepareStatement("UPDATE APP.workers SET name=?, surname=?, login=?, password=?, current_shift=?, suspended=? WHERE id=" + id);
+        }
+
+        preparedStatement.setString(1, name);
+        preparedStatement.setString(2, surname);
+        preparedStatement.setString(3, login);
+        preparedStatement.setString(4, password);
+        if (currentShift != null) {
+            preparedStatement.setLong(5, currentShift.getID());
+        } else {
+            preparedStatement.setNull(5, Types.INTEGER);
+        }
+        preparedStatement.setBoolean(6, suspended);
+        int result = preparedStatement.executeUpdate();
+        connection.close();
+
+        return (result > 0);
+    }
+    /**
+     * Deletes matching record from the database. Provided that the selected
+     * worker has not been saved to the database yet, only returns false.
+     *
+     * @return true when worker is successfuly deleted, false otherwise
+     */
+    public boolean destroy() throws SQLException {
+        if (id == null) {
+            return false;
+        }
+
+        Connection connection = getConnection();
+        Statement statement = connection.createStatement();
+        int result = statement.executeUpdate("DELETE FROM APP.workers WHERE id=" + id);
+        connection.close();
+
+        return (result == 1);
     }
 
     @Override
@@ -349,51 +424,5 @@ public class Worker {
     @Override
     public int hashCode() {
         return (this.login != null ? this.login.hashCode() : 0);
-    }
-
-    /**
-     * Returns connection to the production or testing database.
-     *
-     * @return connection to the database.
-     */
-    private static Connection getConnection() throws SQLException {
-       if (testingMode) {
-           return DriverManager.getConnection(properties.getProperty("testDatabase"),
-                                              properties.getProperty("testLogin"),
-                                              properties.getProperty("testPassword"));
-       }
-       
-       return DriverManager.getConnection(properties.getProperty("productionDatabase"),
-                                          properties.getProperty("productionLogin"),
-                                          properties.getProperty("productionPassword"));
-    }
-    /**
-     * Turns on the testin mode.
-     */
-    public static void testingOn() {
-        testingMode = true;
-    }
-    /**
-     * Turns off the tesing mode.
-     */
-    public static void testingOff() {
-        testingMode = false;
-    }
-    /**
-     * Loads properties from file.
-     *
-     * @return properties from the file
-     */
-    public static Properties loadProperties() {
-        try {
-            FileInputStream inputStream = new FileInputStream("src/Worker.properties");
-            Properties properties = new Properties();
-            properties.load(inputStream);
-            inputStream.close();
-            return properties;
-        } catch (IOException e) {
-            return new Properties();
-            //TODO: LOG fatal error, Property file not found.
-        }
     }
 }

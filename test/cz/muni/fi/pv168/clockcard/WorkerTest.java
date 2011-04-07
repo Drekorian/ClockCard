@@ -3,8 +3,6 @@ package cz.muni.fi.pv168.clockcard;
 import java.util.Properties;
 import java.util.ArrayList;
 import java.sql.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -19,14 +17,15 @@ import static org.junit.Assert.*;
 
 public class WorkerTest {
     private static final Properties PROPERTIES = Worker.loadProperties();
-    private static final String[] NAMES = {"Radek", "Jirina", "Vit", "Dita", "Petr", "Zdenek", "Ludmila", "Alena", "Barbora", "Vladan"};
+    private static final String[] NAMES = {"Radek", "Jirina", "Vit", "Dita", "Petr", "Zdenek", "Ludmila", "Alena", "Barbora", "Vladan" };
     private static final String[] SURNAMES = {"Houha", "Flekova", "Pech", "Knourkova", "Pour", "Polacek", "Urvalkova", "Kahankova", "Boryskova", "Ferus" };
-    private static final String[] LOGINS = {"rhouha", "jflekova", "vpech", "dknourkova", "ppour", "zpolacek", "lurvalkova", "akahankova", "bboryskova", "vferus"};
-    private static final String[] PASSWORDS = {"wolverine", "kopretina", "saddam", "milacek", "sylva", "obelix", "kotatko", "inuyasha", "kreslo", "vladivostok"};
-    private static final Long[] CURRENT_SHIFTS = {null, null, Long.valueOf(123), null, null, Long.valueOf(456), null, Long.valueOf(789), null, null};
-    private static final boolean[] SUSPENSIONS = {false, false, false, false, false, false, false, true, false, true};
+    private static final String[] LOGINS = {"rhouha", "jflekova", "vpech", "dknourkova", "ppour", "zpolacek", "lurvalkova", "akahankova", "bboryskova", "vferus" };
+    private static final String[] PASSWORDS = {"wolverine", "kopretina", "saddam", "milacek", "sylva", "obelix", "kotatko", "inuyasha", "kreslo", "vladivostok" };
+    private static final Long[] CURRENT_SHIFTS = {null, null, Long.valueOf(123), null, null, Long.valueOf(456), null, Long.valueOf(789), null, null };
+    private static final boolean[] SUSPENSIONS = {false, false, false, false, false, false, false, true, false, true };
     
     private Worker joe, bill;
+    private Exception lastThrownException = null;
 
     public WorkerTest() {
     }
@@ -43,36 +42,17 @@ public class WorkerTest {
     public void setUp() {
         joe = new Worker("Joe", "Smith", "joe.smith");
         bill = new Worker("Bill", "Newman", "bill.newman");
+        lastThrownException = null;
     }
 
     @After
     public void tearDown() {
         joe = null;
         bill = null;
+        lastThrownException = null;
     }
 
-    /**
-     * Test of resetForgottenPassword method, of class Worker.
-     */
-    @Test
-    public void testResetForgottenPassword() {
-        String defaultPassword = PROPERTIES.getProperty("defaultPassword");
-        String newPassword = "SomeSecretPassword";
-
-        assertFalse("Joe should not be suspended.", joe.isSuspended());
-
-        if (newPassword.equals(defaultPassword)) {
-            newPassword += ":)";
-        }
-
-        assertTrue("Joe's password should be default password from the property file.",
-                   joe.authenticate(PROPERTIES.getProperty("defaultPassword")));
-        joe.setPassword(newPassword);
-        assertFalse("Joe's password should differ from the default password",
-                    joe.authenticate(PROPERTIES.getProperty(defaultPassword)));
-        assertTrue("Joe's password should be the new specified ", joe.authenticate(newPassword));
-    }
-
+    
     private Connection getConnection() {
         Connection connection = null;
         try {
@@ -84,7 +64,6 @@ public class WorkerTest {
         }
         return connection;
     }
-
     private void resetTable() throws SQLException {
         Connection connection = getConnection();
         Statement statement = connection.createStatement();
@@ -106,7 +85,7 @@ public class WorkerTest {
                               + "CURRENT_SHIFT INTEGER,"
                               + "SUSPENDED SMALLINT)");
         statement.close();
-        
+
         for (int i = 0; i < 10; i++) {
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO APP.workers (name, surname, login, password, current_shift, suspended) VALUES (?, ?, ?, ?, ?, ?)");
             preparedStatement.setString(1, NAMES[i]);
@@ -125,10 +104,25 @@ public class WorkerTest {
         connection.close();
     }
 
-    /**
-     * Truncates the table and then inserts predefined values. Checks whether
-     * created objects are equal.
-     */
+    @Test
+    public void testResetForgottenPassword() {
+        String defaultPassword = PROPERTIES.getProperty("defaultPassword");
+        String newPassword = "SomeSecretPassword";
+
+        assertFalse("Joe should not be suspended.", joe.isSuspended());
+
+        if (newPassword.equals(defaultPassword)) {
+            newPassword += ":)";
+        }
+
+        assertTrue("Joe's password should be default password from the property file.",
+                   joe.authenticate(PROPERTIES.getProperty("defaultPassword")));
+        joe.setPassword(newPassword);
+        assertFalse("Joe's password should differ from the default password",
+                    joe.authenticate(PROPERTIES.getProperty(defaultPassword)));
+        assertTrue("Joe's password should be the new specified ", joe.authenticate(newPassword));
+    }
+
     @Test
     public void testAll() {
         try {
@@ -213,6 +207,110 @@ public class WorkerTest {
     }
 
     @Test
+    public void testStartShift() {
+        assertFalse("Joe should not be suspended.", joe.isSuspended());
+        try {
+            joe.startShift();
+            assertNull("Unexpected WorkerException thrown.", lastThrownException);
+        } catch (WorkerException e) {
+            lastThrownException = e;
+        }
+
+        Shift joeShift = joe.getCurrentShift();
+        assertNotNull("Joe should have a pending shift.", joeShift);
+
+        try {
+            joe.startShift();
+            assertNotNull("WorkerException should have been thrown.", lastThrownException);
+        } catch (WorkerException e) {
+            lastThrownException = e;
+        }
+        lastThrownException = null;
+        assertTrue("Joe's shift should not have changed.", joeShift == joe.getCurrentShift());
+
+
+        assertNull("Bill should not have a pending shift.", bill.getCurrentShift());
+        try {
+            bill.suspend();
+            assertNull("Unexpected WorkerException thrown.", lastThrownException);
+            assertTrue("Bill should be suspended.", bill.isSuspended());
+            bill.startShift();
+            assertNotNull("WorkerException should have been thrown.", lastThrownException);
+        } catch (WorkerException e) {
+            lastThrownException = e;
+        }
+        lastThrownException = null;
+
+        assertNull("Bill should not have a pending shift.", bill.getCurrentShift());
+    }
+
+    @Test
+    public void testEndShift() {
+        assertNull("Joe should not have a pending shift.", joe.getCurrentShift());
+        try {
+            joe.startShift();
+            assertNotNull("Joe should have a pending shift.", joe.getCurrentShift());
+            joe.endShift();
+            assertNull("Joe should not have a pending shift.", joe.getCurrentShift());
+        } catch (WorkerException e) {
+            fail("Joe should be able to start and end a shift.");
+         }
+
+
+        assertNull("Bill should not have a pending shift", bill.getCurrentShift());
+        try {
+            bill.endShift();
+            assertNotNull("WorkerException should have been thrown.", lastThrownException);
+        } catch (WorkerException e) {
+            lastThrownException = e;
+        }
+        lastThrownException = null;
+
+        assertNull("Joe should not have a pending shift.", joe.getCurrentShift());
+    }
+
+    @Test
+    public void testSuspend() {
+        assertFalse("Joe should not be suspended.", joe.isSuspended());
+        try {
+            joe.suspend();
+        } catch (WorkerException e) {
+            fail("Joe should be able to get suspended.");
+        }
+        assertTrue("Joe should be suspended.", joe.isSuspended());
+
+        try {
+            joe.suspend();
+            assertNotNull("WorkerException should have been thrown.", lastThrownException);
+        } catch (WorkerException e) {
+            lastThrownException = e;
+        }
+        lastThrownException = null;
+
+        assertTrue("Joe should be suspended", joe.isSuspended());
+    }
+
+    @Test
+    public void testUnsuspend() {
+        assertFalse("Joe should not be suspended.", joe.isSuspended());
+        try {
+            joe.suspend();
+            joe.unsuspend();
+        } catch (WorkerException e) {
+            fail("Joe should be able to get suspended and then unsuspended.");
+        }
+        assertFalse("Joe should not be suspended.", joe.isSuspended());
+
+        try {
+            joe.unsuspend();
+            assertNotNull("WorkerException should have been thrown.", lastThrownException);
+        } catch (WorkerException e) {
+            lastThrownException = e;
+        }
+        assertFalse("Joe should not be suspended.", joe.isSuspended());
+    }
+
+    @Test
     public void testSave() {
         try {
             resetTable();
@@ -256,7 +354,11 @@ public class WorkerTest {
         Worker.testingOn();
 
         Worker newWorker = new Worker("John", "Doe", "jdoe");
-        assertFalse("Destroy should return false if the worker has not been saved yet.", newWorker.destroy());
+        try {
+            assertFalse("Destroy should return false if the worker has not been saved yet.", newWorker.destroy());
+        } catch (SQLException ex) {
+            fail("Failed to recognize that worker has not been saved yet.");
+        }
 
         try {
             Worker firstWorker = Worker.find(1);
@@ -267,10 +369,7 @@ public class WorkerTest {
         }  catch (SQLException ex) {
             fail("Unable to retrieve the first worker in the database.");
         }
-        
 
         Worker.testingOff();
     }
-
-    
 }
