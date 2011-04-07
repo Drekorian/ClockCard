@@ -11,4 +11,8 @@ package cz.muni.fi.pv168.clockcard;
  */
 
 public class Shift {
+
+    public static Shift find(Long id) {
+        return new Shift();
+    }
 }

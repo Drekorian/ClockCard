@@ -17,7 +17,7 @@ h3. Tasks
 ## Shift class test methods (David) [100%] { 10. 3. - 23. 3. }
 # Implementation of basic DB operations
 ## Database preparation (David) [100%] { 24. 3. - 6. 4. }
-## Testing database preparation (?) [0%] { 31.3 - ? }
+## Testing database preparation (Marek) [100%] { 31.3 - 6. 4.}
 ## DB methods tests (?) [0%] { 31.3 - ? }
 ### Worker class [0%]
 #### all() [x]

@@ -1,18 +1,22 @@
 package cz.muni.fi.pv168.clockcard;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 /**
- * Class that represents worker using the ClockCard system.
+ * Class that represents worker who is using the ClockCard system.
  *
  * @author Marek Osvald
  */
 
 public class Worker {
-    //TODO: Load default from the property file.
-    private static final String DEFAULT_PASSWORD = ""; // _DO NOT_ use this value.
+    private static final Properties properties = loadProperties();
+    private static boolean testingMode = false;
 
     private Long id;
     private String name;
@@ -28,7 +32,7 @@ public class Worker {
      * @param worker worker whose password is being reset
      */
     public static void resetForgottenPassword(Worker worker) {
-        //worker.password = defaultPassword;
+        worker.password = properties.getProperty("defaultPassword");
     }
     /**
      * Returns lists of all workers in the database.
@@ -36,13 +40,23 @@ public class Worker {
      * @return list of all workers in the database.
      */
     public static List<Worker> all() throws SQLException {
-        /*Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/clockcard", "root", "root");
+        Connection connection = getConnection();
         Statement statement = connection.createStatement();
-        boolean execute = statement.execute("SELECT * FROM workers");
+        ResultSet resultSet = statement.executeQuery("SELECT * FROM APP.workers");
 
-        //TODO: get rid of the throws
-        */
-        return new ArrayList<Worker>();
+        ArrayList<Worker> result = new ArrayList<Worker>();
+        while (resultSet.next()) {
+            Worker worker = new Worker(resultSet.getLong(1),
+                                       resultSet.getString(2),
+                                       resultSet.getString(3),
+                                       resultSet.getString(4),
+                                       resultSet.getString(5),
+                                       resultSet.getLong(6),
+                                       resultSet.getBoolean(7));
+            result.add(worker);
+        }
+        connection.close();
+        return Collections.unmodifiableList(result);
     }
     /**
      * Returns worker with the selected ID from the database or null if the
@@ -52,18 +66,42 @@ public class Worker {
      * @return worker with the selected ID from the database or null if the
      * worker is not found
      */
-    public static Worker find(long id) {
-        //TODO implement
-        return new Worker("", "", ""); //_DO NOT_ USE THIS -- JUST A DUMMY OBJECT
+    public static Worker find(long id) throws SQLException {
+        Connection connection = getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM APP.workers WHERE id=?");
+        preparedStatement.setLong(1, id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        Worker worker = null;
+
+        if (resultSet.getFetchSize() == 1 && resultSet.next()) {
+            worker = new Worker(resultSet.getLong(1),
+                                resultSet.getString(2),
+                                resultSet.getString(3),
+                                resultSet.getString(4),
+                                resultSet.getString(5),
+                                resultSet.getLong(6),
+                                resultSet.getBoolean(7));
+        }
+        connection.close();
+        return worker;
     }
     /**
      * Returns total number of workers in the database.
      *
      * @return total number of workers in the database
      */
-    public static int count() {
-        //TODO implement
-        return 0; //_DO NOT_ USE THIS -- JUST A DUMMY VALUE
+    public static int count() throws SQLException {
+        Connection connection = getConnection();
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("SELECT count(*) FROM APP.workers");
+        
+        int result = 0;
+        while (resultSet.next()) {
+            result = resultSet.getInt(1);
+        }
+        connection.close();
+        return result;
     }
     /**
      * Deletes matching record from the database.
@@ -72,22 +110,44 @@ public class Worker {
         //
     }
     /**
-     * Parametric constructor.
+     * Parametric constructor. This constructor is used for objects that have
+     * not been serialized into the database yet.
      * 
      * @param name name of the worker
      * @param surname surname of the worker
      * @param login login of the worker
      */
-    Worker(String name, String surname, String login) {
+    public Worker(String name, String surname, String login) {
         this.name = name;
         this.surname = surname;
         this.login = login;
-        this.password = DEFAULT_PASSWORD;
+        this.password = properties.getProperty("defaultPassword");
+    }
+    /**
+     * Parametric constructor. This constructor is used to recreate objects that
+     * have been previuosly stored in the database.
+     *
+     * @param id id of the worker
+     * @param name name of the worker
+     * @param surname surname of the worker
+     * @param login login of the worker
+     * @param password password of the worker
+     * @param currentShift id of the current pending shift
+     * @param suspended true when worker is suspended, false otherwise
+     */
+    private Worker(Long id, String name, String surname, String login, String password, Long currentShift, boolean suspended) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+        this.password = password;
+        this.login = login;
+        this.currentShift = Shift.find(currentShift);
+        this.suspended = suspended;
     }
     /**
      * Returns ID of the worker.
      *
-     * @return id of the worker, null provided that the worker was not saved to the database yet.
+     * @return id of the worker or null when the worker has not been saved to the database yet.
      */
     public Long getID() {
         return id;
@@ -108,23 +168,43 @@ public class Worker {
     public void setName(String name) {
         this.name = name;
     }
-
+    /**
+     * Returns surname.
+     *
+     * @return surname of the worker
+     */
     public String getSurname() {
         return surname;
     }
-
+    /**
+     * Sets surname of the worker.
+     *
+     * @param surname surname of the worker.
+     */
     public void setSurname(String surname) {
         this.surname = surname;
     }
-
+    /**
+     * Returns login of the worker.
+     *
+     * @return login of the worker
+     */
     public String getLogin() {
         return login;
     }
-
+    /**
+     * Sets login of the worker.
+     *
+     * @param login login of the worker.
+     */
     public void setLogin(String login) {
         this.login = login;
     }
-
+    /**
+     * Sets password of the worker.
+     *
+     * @param password password of the worker.
+     */
     public void setPassword(String password) {
         this.password = password;
     }
@@ -136,8 +216,17 @@ public class Worker {
     public Shift getCurrentShift() {
         return currentShift;
     }
-
+    /**
+     * Tries to log user into the system.
+     *
+     * @param password password to authenticate with
+     * @return true when password is correct and worker is not suspended, false otherwise
+     */
     public boolean authenticate(String password) {
+        if (suspended) {
+            return false;
+        }
+        
         return this.password.equals(password);
     }
 
@@ -157,7 +246,7 @@ public class Worker {
         //TODO implement
     }
     /**
-     * Returns true when worker is suspended, false otherwise.
+     * Returns whether the worker is suspended or not.
      *
      * @return true when worker is suspended, false otherwise
      */
@@ -196,5 +285,71 @@ public class Worker {
     public List<Shift> getShifts() {
         //TODO implement;
         return new ArrayList<Shift>();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final Worker other = (Worker) obj;
+
+        if (login == null || other.login == null) {
+            return false;
+        }
+
+        return this.login.equals(other.login);
+    }
+
+    @Override
+    public int hashCode() {
+        return (this.login != null ? this.login.hashCode() : 0);
+    }
+
+    /**
+     * Returns connection to the production or testing database.
+     *
+     * @return connection to the database.
+     */
+    private static Connection getConnection() throws SQLException {
+       if (testingMode) {
+           return DriverManager.getConnection(properties.getProperty("testDatabase"),
+                                              properties.getProperty("testLogin"),
+                                              properties.getProperty("testPassword"));
+       }
+       
+       return DriverManager.getConnection(properties.getProperty("productionDatabase"),
+                                          properties.getProperty("productionLogin"),
+                                          properties.getProperty("productionPassword"));
+    }
+    /**
+     * Turns on the testin mode.
+     */
+    public static void testingOn() {
+        testingMode = true;
+    }
+    /**
+     * Turns off the tesing mode.
+     */
+    public static void testingOff() {
+        testingMode = false;
+    }
+    /**
+     * Loads properties from file.
+     *
+     * @return properties from the file
+     */
+    public static Properties loadProperties() {
+        try {
+            FileInputStream inputStream = new FileInputStream("src/Worker.properties");
+            Properties properties = new Properties();
+            properties.load(inputStream);
+            inputStream.close();
+            return properties;
+        } catch (IOException e) {
+            return new Properties();
+            //TODO: LOG fatal error, Property file not found.
+        }
     }
 }
