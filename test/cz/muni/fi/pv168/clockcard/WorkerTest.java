@@ -212,5 +212,65 @@ public class WorkerTest {
         }
     }
 
+    @Test
+    public void testSave() {
+        try {
+            resetTable();
+        } catch (SQLException ex) {
+            fail("Unable to reset table");
+        }
 
+        Worker newWorker = new Worker("John", "Doe", "jdoe");
+        Worker.testingOn();
+        try {
+            assertTrue("Saving John Doe to the database failed.", newWorker.save());
+        } catch (SQLException ex) {
+            fail("Unable to save John Doe to the database.");
+        }
+        
+        Worker firstWorker = null;
+        try {
+            firstWorker = Worker.find(1);
+        } catch (SQLException ex) {
+            fail("Unable to retrieve first worker from the database.");
+        }
+        assertFalse("First user should not have login 'bigboss'", firstWorker.getLogin().equals("bigboss"));
+        firstWorker.setPassword("boss");
+        try {
+            assertTrue("Updating of the first worker failed.", firstWorker.save());
+        } catch (SQLException ex) {
+            System.out.println(ex);
+            fail("Unable to update first worker in the database.");
+        }
+        Worker.testingOff();
+    }
+
+    @Test
+    public void testDestroy() {
+        try {
+            resetTable();
+        } catch (SQLException ex) {
+            fail("Unable to reset table.");
+        }
+
+        Worker.testingOn();
+
+        Worker newWorker = new Worker("John", "Doe", "jdoe");
+        assertFalse("Destroy should return false if the worker has not been saved yet.", newWorker.destroy());
+
+        try {
+            Worker firstWorker = Worker.find(1);
+            assertTrue("Database should be in the default state.", Worker.count() == LOGINS.length);
+            assertTrue("Deleting the first Worker from the database failed.", firstWorker.destroy());
+            assertTrue("Database should contain one less record than it's default state.", Worker.count() == LOGINS.length - 1);
+            assertNull("First worker should not be in the database.", Worker.find(1));
+        }  catch (SQLException ex) {
+            fail("Unable to retrieve the first worker in the database.");
+        }
+        
+
+        Worker.testingOff();
+    }
+
+    
 }

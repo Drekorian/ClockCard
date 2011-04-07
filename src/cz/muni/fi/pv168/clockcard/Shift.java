@@ -15,4 +15,9 @@ public class Shift {
     public static Shift find(Long id) {
         return new Shift();
     }
+
+    public long getID() {
+        //TODO: implement;
+        return 0;
+    }
 }

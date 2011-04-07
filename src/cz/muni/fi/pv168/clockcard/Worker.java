@@ -104,10 +104,54 @@ public class Worker {
         return result;
     }
     /**
-     * Deletes matching record from the database.
+     * Saves worker into the database. Executes INSERT when worker is saved for
+     * the first time, UPDATE otherwise.
+     *
+     * @return true when worker is successfuly saved, false otherwise
+     * @throws SQLException
      */
-    public void destroy() {
-        //
+    public boolean save() throws SQLException {
+        Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+
+        if (id == null) {
+            preparedStatement = connection.prepareStatement("INSERT INTO APP.workers (name, surname, login, password, current_shift, suspended) VALUES (?, ?, ?, ?, ?, ?)");
+        } else {
+            preparedStatement = connection.prepareStatement("UPDATE APP.workers SET name=?, surname=?, login=?, password=?, current_shift=?, suspended=? WHERE id=" + id);
+        }
+        
+        preparedStatement.setString(1, name);
+        preparedStatement.setString(2, surname);
+        preparedStatement.setString(3, login);
+        preparedStatement.setString(4, password);
+        if (currentShift != null) {
+            preparedStatement.setLong(5, currentShift.getID());
+        } else {
+            preparedStatement.setNull(5, Types.INTEGER);
+        }
+        preparedStatement.setBoolean(6, suspended);
+        int result = preparedStatement.executeUpdate();
+        connection.close();
+
+        return (result > 0);
+    }
+    /**
+     * Deletes matching record from the database. Provided that the selected
+     * worker has not been saved to the database yet, only returns false.
+     *
+     * @return true when worker is successfuly deleted, false otherwise
+     */
+    public boolean destroy() throws SQLException {
+        if (id == null) {
+            return false;
+        }
+
+        Connection connection = getConnection();
+        Statement statement = connection.createStatement();
+        int result = statement.executeUpdate("DELETE FROM APP.workers WHERE id=" + id);
+        connection.close();
+
+        return (result == 1);
     }
     /**
      * Parametric constructor. This constructor is used for objects that have
