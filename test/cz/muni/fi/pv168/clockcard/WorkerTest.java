@@ -1,5 +1,6 @@
 package cz.muni.fi.pv168.clockcard;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.ArrayList;
 import java.sql.*;
@@ -131,7 +132,7 @@ public class WorkerTest {
             fail("Unable to reset table");
         }
 
-        ArrayList<Worker> originalWorkers = new ArrayList<Worker>();
+        List<Worker> originalWorkers = new ArrayList<Worker>();
 
         for(int i = 0; i < 10; i++) {
             Worker worker = new Worker(NAMES[i], SURNAMES[i], LOGINS[i]);
