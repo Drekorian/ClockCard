@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class that represents worker who is using the ClockCard system.
@@ -16,7 +18,7 @@ import java.util.Properties;
 
 public class Worker {
     private static final Properties properties = loadProperties();
-    private static boolean testingMode = false;
+    private static boolean testingMode = true;
 
     private Long id;
     private String name;
@@ -32,15 +34,14 @@ public class Worker {
      * @return connection to the database.
      */
     private static Connection getConnection() throws SQLException {
-       if (testingMode) {
-           return DriverManager.getConnection(properties.getProperty("testDatabase"),
-                                              properties.getProperty("testLogin"),
-                                              properties.getProperty("testPassword"));
+       ConnectionManager cm = new ConnectionManager(new DBConfiguration(!testingMode));
+       Connection conn = null; PreparedStatement p_stmt = null;
+        try {
+            conn = ConnectionManager.ds.getConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(TestPool.class.getName()).log(Level.SEVERE, null, ex);
        }
-
-       return DriverManager.getConnection(properties.getProperty("productionDatabase"),
-                                          properties.getProperty("productionLogin"),
-                                          properties.getProperty("productionPassword"));
+       return conn;
     }
 
     
@@ -166,7 +167,7 @@ public class Worker {
      * @param currentShift id of the current pending shift
      * @param suspended true when worker is suspended, false otherwise
      */
-    private Worker(Long id, String name, String surname, String login, String password, Long currentShift, boolean suspended) {
+    private Worker(long id, String name, String surname, String login, String password, long currentShift, boolean suspended) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -191,6 +192,7 @@ public class Worker {
         this.login = login;
         this.password = properties.getProperty("defaultPassword");
     }
+
     /**
      * Returns ID of the worker.
      *
@@ -425,4 +427,6 @@ public class Worker {
     public int hashCode() {
         return (this.login != null ? this.login.hashCode() : 0);
     }
+
+    
 }
