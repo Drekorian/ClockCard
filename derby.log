@@ -1,8 +1,0 @@
-----------------------------------------------------------------
-Sat Apr 09 20:08:12 CEST 2011:
- Zavádění serveru Derby verze The Apache Software Foundation - Apache Derby - 10.7.1.1 - (1040133): instance a816c00e-012f-3b73-2479-000000d4e1f0
-v adresáři databáze C:\work\Java\ClockCard\db\clockcard_test  sun.misc.Launcher$AppClassLoader@d9f9c3 
-
-java.vendor=Sun Microsystems Inc.
-java.runtime.version=1.6.0_23-b05
-Byl spuštěn zavaděč třídy databáze - derby.database.classpath=''

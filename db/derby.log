@@ -1,7 +1,0 @@
-2011-03-30 14:55:39.880 GMT : Síovı server Apache Derby - 10.5.3.0 - (802917): spuštìn a pøipraven pøijímat pøipojení na portu 1527 v {3} 
-----------------------------------------------------------------
-2011-03-30 14:55:40.449 GMT:
- Zavádìní serveru Derby verze The Apache Software Foundation - Apache Derby - 10.5.3.0 - (802917): instance a816c00e-012f-0743-4366-000012aaef4d
-v adresáøi databáze C:\devel\java2\ClockCard\db\clockcard  
-
-Byl spuštìn zavadìè tøídy databáze - derby.database.classpath=''
