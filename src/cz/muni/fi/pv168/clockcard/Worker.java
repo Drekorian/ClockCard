@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Class that represents worker who is using the ClockCard system.
@@ -33,16 +31,7 @@ public class Worker {
      *
      * @return connection to the database.
      */
-    private static Connection getConnection() throws SQLException {
-       ConnectionManager cm = new ConnectionManager(new DBConfiguration(!testingMode));
-       Connection conn = null; PreparedStatement p_stmt = null;
-        try {
-            conn = ConnectionManager.ds.getConnection();
-        } catch (SQLException ex) {
-            Logger.getLogger(TestPool.class.getName()).log(Level.SEVERE, null, ex);
-       }
-       return conn;
-    }
+    
 
     
     /**
@@ -53,10 +42,10 @@ public class Worker {
     public static Properties loadProperties() {
         try {
             FileInputStream inputStream = new FileInputStream("src/Worker.properties");
-            Properties properties = new Properties();
-            properties.load(inputStream);
+            Properties prop = new Properties();
+            prop.load(inputStream);
             inputStream.close();
-            return properties;
+            return prop;
         } catch (IOException e) {
             return new Properties();
             //TODO: LOG fatal error, Property file not found.
@@ -81,7 +70,7 @@ public class Worker {
      * @return list of all workers in the database.
      */
     public static List<Worker> all() throws SQLException {
-        Connection connection = getConnection();
+        Connection connection = ConnectionManager.getConnection();
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT * FROM APP.workers");
 
@@ -108,7 +97,7 @@ public class Worker {
      * worker is not found
      */
     public static Worker find(long id) throws SQLException {
-        Connection connection = getConnection();
+        Connection connection = ConnectionManager.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM APP.workers WHERE id=?");
         preparedStatement.setLong(1, id);
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -133,7 +122,7 @@ public class Worker {
      * @return total number of workers in the database
      */
     public static int count() throws SQLException {
-        Connection connection = getConnection();
+        Connection connection = ConnectionManager.getConnection();
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT count(*) FROM APP.workers");
         
@@ -365,7 +354,7 @@ public class Worker {
      * @throws SQLException
      */
     public boolean save() throws SQLException {
-        Connection connection = getConnection();
+        Connection connection = ConnectionManager.getConnection();
         PreparedStatement preparedStatement = null;
 
         if (id == null) {
@@ -400,7 +389,7 @@ public class Worker {
             return false;
         }
 
-        Connection connection = getConnection();
+        Connection connection = ConnectionManager.getConnection();
         Statement statement = connection.createStatement();
         int result = statement.executeUpdate("DELETE FROM APP.workers WHERE id=" + id);
         connection.close();

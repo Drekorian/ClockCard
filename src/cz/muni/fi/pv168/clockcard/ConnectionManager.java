@@ -5,6 +5,8 @@
 
 package cz.muni.fi.pv168.clockcard;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
@@ -16,14 +18,26 @@ import org.apache.commons.pool.impl.GenericObjectPool;
  */
 public class ConnectionManager {
 
+    private static Connection connection = null;
     public static DataSource ds = null;
     private static GenericObjectPool _pool = null;
 
     public ConnectionManager(DBConfiguration config) {
-
         this.connectToDb(config);
-
     }
+
+    public static Connection getConnection() throws SQLException {
+        if(ConnectionManager.connection==null){
+               ConnectionManager cm = new ConnectionManager(new DBConfiguration(false));
+                try {
+                    ConnectionManager.connection = ConnectionManager.ds.getConnection();
+                } catch (SQLException ex) {
+                    Logger.getLogger(TestPool.class.getName()).log(Level.SEVERE, null, ex);
+               }
+        }
+       return ConnectionManager.connection;
+    }
+
 
     protected void finalize()
     {
