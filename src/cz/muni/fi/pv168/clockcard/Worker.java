@@ -16,7 +16,7 @@ import java.util.Properties;
 
 public class Worker {
     private static final Properties properties = loadProperties();
-    private static boolean testingMode = true;
+    private static boolean testingMode = false;
 
     private Long id;
     private String name;

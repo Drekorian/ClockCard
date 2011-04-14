@@ -103,9 +103,4 @@ public class ShiftManager {
         return Collections.unmodifiableList(result);
     }
 
-   public static Shift getLastShift(){
-     throw new Exception("Not implemented yet.");
-   }
-
-
 }
