@@ -39,6 +39,7 @@ public class ConnectionManager {
     }
 
 
+    @Override
     protected void finalize()
     {
         try {
