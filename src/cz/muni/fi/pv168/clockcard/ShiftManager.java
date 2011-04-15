@@ -17,7 +17,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
- *
+ *  Class for manage shifts.
  * @author Fires
  */
 public class ShiftManager {
@@ -27,7 +27,11 @@ public class ShiftManager {
     private final static String GET_COUNT = "SELECT COUNT(*) FROM APP.shifts";
     private final static String GET_BY_WORKER_ID = "SELECT * FROM APP.shifts WHERE worker_id=?";
 
-
+    /**
+     * Method for get all shifts in database.
+     * @return List<Shift> list of shifts
+     * @throws SQLException
+     */
     public static List<Shift> getAll() throws SQLException{
         Connection connection = ConnectionManager.getConnection();
         Statement statement = connection.createStatement();
@@ -50,6 +54,13 @@ public class ShiftManager {
         return Collections.unmodifiableList(result);
     }
 
+    /**
+     * Method to get shift by shift id.
+     * @param id
+     * @return Shift
+     * @throws SQLException
+     * @throws ShiftException
+     */
     public static Shift getById(long id) throws SQLException, ShiftException{
         Connection connection = ConnectionManager.getConnection();
         PreparedStatement statement = connection.prepareStatement(GET_BY_ID);
@@ -71,6 +82,11 @@ public class ShiftManager {
             return shift;
     }
 
+    /**
+     * Method to get shift count in database.
+     * @return int number of shifts in database
+     * @throws SQLException
+     */
     public static int getCount() throws SQLException{
         Connection connection = ConnectionManager.getConnection();
         Statement statement = connection.createStatement();
@@ -80,6 +96,12 @@ public class ShiftManager {
         return count;
     }
 
+    /**
+     * Method to get all shift what are assigned to worker.
+     * @param workerid
+     * @return List<Shift> list of shifts
+     * @throws SQLException
+     */
     public static List<Shift> getShiftsByWorkerId(long workerid) throws SQLException{
         Connection connection = ConnectionManager.getConnection();
         PreparedStatement statement = connection.prepareStatement(GET_BY_WORKER_ID);

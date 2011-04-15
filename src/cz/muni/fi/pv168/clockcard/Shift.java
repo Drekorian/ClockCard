@@ -60,6 +60,11 @@ public class Shift {
         this.start = start;
     }
 
+    /**
+     * Method to save Shift to db.
+     * If shift is created by "short" constructor, save method save shift to db and set generated id to this object, else just save shift to db.
+     * @throws SQLException
+     */
     public void save() throws SQLException{
         Connection con = ConnectionManager.getConnection();
         if(id==0){
@@ -84,6 +89,10 @@ public class Shift {
 
     }
 
+    /**
+     * Delete shift from db.
+     * @throws SQLException
+     */
     public void destroy() throws SQLException{
         Connection con = ConnectionManager.getConnection();
         PreparedStatement prep = con.prepareStatement(DELETE_SHIFT);
