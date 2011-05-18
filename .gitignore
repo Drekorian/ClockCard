@@ -1,0 +1,9 @@
+# compiled binaries
+.class
+
+# logs
+*.log
+
+# locks
+*.lock
+*.lck
