@@ -50,8 +50,8 @@ public class ShiftTest {
     public void testSave() throws Exception {
         Shift smena = new Shift(10, new GregorianCalendar());
             smena.save();
-        System.out.println(smena.getId());
-        assertTrue(smena.equals(ShiftManager.getById(smena.getId())));
+        System.out.println(smena.getID());
+        assertTrue(smena.equals(ShiftManager.getById(smena.getID())));
     }
 
     /**
@@ -81,7 +81,7 @@ public class ShiftTest {
         Shift smena = new Shift(10, new GregorianCalendar());
             smena.save();
             smena.destroy();
-        ShiftManager.getById(smena.getId());
+        ShiftManager.getById(smena.getID());
 
 
      }

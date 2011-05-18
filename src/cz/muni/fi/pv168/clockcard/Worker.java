@@ -8,6 +8,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class that represents worker who is using the ClockCard system.
@@ -265,31 +267,46 @@ public class Worker extends ADatabaseStoreable {
      * @return true when worker is successfuly saved, false otherwise
      * @throws SQLException
      */
-    /*public boolean save() throws SQLException {
-        Connection connection = ConnectionManager.getConnection();
+    public boolean save() {
+        Connection connection = null;
         PreparedStatement preparedStatement = null;
+        int result = 0;
 
-        if (id == null) {
-            preparedStatement = connection.prepareStatement("INSERT INTO APP.workers (name, surname, login, password, current_shift, suspended) VALUES (?, ?, ?, ?, ?, ?)");
-        } else {
-            preparedStatement = connection.prepareStatement("UPDATE APP.workers SET name=?, surname=?, login=?, password=?, current_shift=?, suspended=? WHERE id=" + id);
-        }
+        try {
+            connection = ConnectionManager.getConnection();
 
-        preparedStatement.setString(1, name);
-        preparedStatement.setString(2, surname);
-        preparedStatement.setString(3, login);
-        preparedStatement.setString(4, password);
-        if (currentShift != null) {
-            preparedStatement.setLong(5, currentShift.getID());
-        } else {
-            preparedStatement.setNull(5, Types.INTEGER);
+            if (id == null) {
+                preparedStatement = connection.prepareStatement(properties.getProperty("saveQuery"));
+            } else {
+                preparedStatement = connection.prepareStatement(properties.getProperty("updateQuery") + id);
+            }
+
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, surname);
+            preparedStatement.setString(3, login);
+            preparedStatement.setString(4, password);
+            if (currentShift != null) {
+                preparedStatement.setLong(5, currentShift.getID());
+            } else {
+                preparedStatement.setNull(5, Types.INTEGER);
+            }
+            preparedStatement.setBoolean(6, suspended);
+            
+            result = preparedStatement.executeUpdate();
+        } catch (SQLException ex) {
+            //TODO: log error
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                    //Log error
+                }
+            }
         }
-        preparedStatement.setBoolean(6, suspended);
-        int result = preparedStatement.executeUpdate();
-        connection.close();
 
         return (result > 0);
-    }*/
+    }
     
     /**
      * Deletes matching record from the database. Provided that the selected
@@ -297,18 +314,33 @@ public class Worker extends ADatabaseStoreable {
      *
      * @return true when worker is successfuly deleted, false otherwise
      */
-    /*public boolean destroy() throws SQLException {
+    public boolean destroy() {
         if (id == null) {
             return false;
         }
 
-        Connection connection = ConnectionManager.getConnection();
-        Statement statement = connection.createStatement();
-        int result = statement.executeUpdate("DELETE FROM APP.workers WHERE id=" + id);
-        connection.close();
+        Connection connection = null;
+        Statement statement;
+        int result = 0;
+
+        try {
+            connection = ConnectionManager.getConnection();
+            statement = connection.createStatement();
+            result = statement.executeUpdate(properties.getProperty("deleteQuery") + id);
+        } catch (SQLException ex) {
+            //TODO: log
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                    //log exception
+                }
+            }
+        }
 
         return (result == 1);
-    }*/
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -328,13 +360,5 @@ public class Worker extends ADatabaseStoreable {
     @Override
     public int hashCode() {
         return (this.login != null ? this.login.hashCode() : 0);
-    }
-
-    public boolean save() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean destroy() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

@@ -132,8 +132,7 @@ public class Shift {
      *
      * @return unique ID of the shift
      */
-    public long getId() {
-        //TODO: Refactor: Rename - capital I, capital D
+    public long getID() {
         return id;
     }
 
@@ -196,7 +195,7 @@ public class Shift {
         }
 
         final Shift other = (Shift) obj;
-        if (this.id != other.getId()) {
+        if (this.id != other.getID()) {
             return false;
         }
 
