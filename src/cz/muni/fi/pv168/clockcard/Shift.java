@@ -169,6 +169,4 @@ public class Shift {
         hash = 59 * hash + (int) (this.id ^ (this.id >>> 32));
         return hash;
     }
-
-
 }

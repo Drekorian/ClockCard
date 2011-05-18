@@ -143,7 +143,7 @@ public class Worker {
         worker.password = properties.getProperty("defaultPassword");
     }
 
-    
+    //TODO: reimplement to use ShiftManager
     /**
      * Parametric constructor. This constructor is used to recreate objects that
      * have been previuosly stored in the database.

@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package cz.muni.fi.pv168.clockcard;
 
 import java.sql.Connection;
@@ -20,6 +15,7 @@ import java.util.List;
  *  Class for manage shifts.
  * @author Fires
  */
+
 public class ShiftManager {
 
     private final static String GET_ALL = "SELECT * FROM APP.shifts";
