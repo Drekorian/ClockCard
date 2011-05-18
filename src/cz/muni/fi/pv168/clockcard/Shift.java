@@ -12,8 +12,8 @@ import java.util.GregorianCalendar;
 /**
  * Represents a shift worked by a worker.
  *
- * @author Marek Osvald
  * @author David Stein
+ * @author Marek Osvald
  *
  * @version 2011.0518
  */
@@ -31,7 +31,7 @@ public class Shift {
    private Calendar lastBreakStart = new GregorianCalendar(0, 0, 0, 0, 0, 0);
    private long totalBreakTime = 0;
 
-   /**
+    /**
     * Parametric constructor.
     * 
     * @param id unique ID of the shift
@@ -43,7 +43,7 @@ public class Shift {
     *
     * TODO: This seems to be COMPLETELY WRONG! Total misunderstanding of intended design.
     */
-   public Shift(long id, long workerId, Calendar start, Calendar end, Calendar lastBreakStart, long totalBreakTime){
+    public Shift(long id, long workerId, Calendar start, Calendar end, Calendar lastBreakStart, long totalBreakTime){
         this.id = id;
         this.workerId = workerId;
         this.start = start;
@@ -52,10 +52,10 @@ public class Shift {
         this.totalBreakTime = totalBreakTime;
    }
 
-   /**
-    * Constructor for start shift
-    * @param workerId
-    * @param start
+    /**
+    * Parametric constructor. Creates shift based on worker's ID and date and time of the shift's start.
+    * @param workerId unique ID of the worker
+    * @param start date and time of the shift's starts
     */
     public Shift(long workerId, Calendar start) {
         this.workerId = workerId;
@@ -63,65 +63,104 @@ public class Shift {
     }
 
     /**
-     * Method to save Shift to db.
-     * If shift is created by "short" constructor, save method save shift to db and set generated id to this object, else just save shift to db.
+     * Saves shift to the database.
+     *
+     * Provided that shift was created by a 2-parameter constructor, saves shift
+     * to the database and sets generated IS to this object. Otherwise just saves
+     * shift to the database.
+     *
      * @throws SQLException
      */
     public void save() throws SQLException{
         Connection con = ConnectionManager.getConnection();
-        if(id==0){
-            PreparedStatement prepareStatement = con.prepareStatement(INSERT_SHIFT,Statement.RETURN_GENERATED_KEYS);
-                prepareStatement.setLong(1, workerId);
-                prepareStatement.setTimestamp(2, new Timestamp(start.getTimeInMillis()));
-                prepareStatement.setTimestamp(3, new Timestamp(end.getTimeInMillis()));
-                prepareStatement.setTimestamp(4, new Timestamp(lastBreakStart.getTimeInMillis()));
-                prepareStatement.setLong(5, totalBreakTime);
-                prepareStatement.execute();
+        
+        if (id == 0) {
+            PreparedStatement prepareStatement = con.prepareStatement(INSERT_SHIFT, Statement.RETURN_GENERATED_KEYS);
+            prepareStatement.setLong(1, workerId);
+            prepareStatement.setTimestamp(2, new Timestamp(start.getTimeInMillis()));
+            prepareStatement.setTimestamp(3, new Timestamp(end.getTimeInMillis()));
+            prepareStatement.setTimestamp(4, new Timestamp(lastBreakStart.getTimeInMillis()));
+            prepareStatement.setLong(5, totalBreakTime);
+            prepareStatement.execute();
+            
             ResultSet result =  prepareStatement.getGeneratedKeys();
-                result.next();
-                id = result.getLong(1);
-        }else{
+            result.next();
+            id = result.getLong(1);
+        } else {
             PreparedStatement prepareStatement = con.prepareStatement(UPDATE_SHIFT);
-                prepareStatement.setTimestamp(1, new Timestamp(start.getTimeInMillis()));
-                prepareStatement.setTimestamp(2, new Timestamp(end.getTimeInMillis()));
-                prepareStatement.setTimestamp(3, new Timestamp(lastBreakStart.getTimeInMillis()));
-                prepareStatement.setLong(4, totalBreakTime);
-                prepareStatement.executeUpdate();
+            prepareStatement.setTimestamp(1, new Timestamp(start.getTimeInMillis()));
+            prepareStatement.setTimestamp(2, new Timestamp(end.getTimeInMillis()));
+            prepareStatement.setTimestamp(3, new Timestamp(lastBreakStart.getTimeInMillis()));
+            prepareStatement.setLong(4, totalBreakTime);
+            prepareStatement.executeUpdate();
         }
-
     }
 
     /**
-     * Delete shift from db.
+     * Deletes a shift from the database.
+     *
      * @throws SQLException
      */
     public void destroy() throws SQLException{
+        //TODO: Returns WRONG return type. Should return BOOLEAN - true upon success and false otherwise.
         Connection con = ConnectionManager.getConnection();
         PreparedStatement prep = con.prepareStatement(DELETE_SHIFT);
-            prep.setLong(1, this.id);
-            prep.execute();
+        prep.setLong(1, this.id);
+        prep.execute();
     }
 
+    /**
+     * Returns date and time of the end of the shift.
+     *
+     * @return date and time of the end of the shift
+     */
     public Calendar getEnd() {
         return end;
     }
 
+    /**
+     * Sets end date and time of the shift.
+     * 
+     * @param end end date and time of the shift
+     */
     public void setEnd(Calendar end) {
         this.end = end;
     }
 
+    /**
+     * Returns unique ID of the shift.
+     *
+     * @return unique ID of the shift
+     */
     public long getId() {
+        //TODO: Refactor: Rename - capital I, capital D
         return id;
     }
 
+    /**
+     * Sets unique ID of the shift.
+     *
+     * @param id unique ID of the shift
+     */
     public void setId(long id) {
+        //Bad smell in code. Get back to this.
         this.id = id;
     }
 
+    /**
+     * Returns start date and time of the last break during shift.
+     *
+     * @return start date and time of the last break during shift
+     */
     public Calendar getLastBreakStart() {
         return lastBreakStart;
     }
 
+    /**
+     * Sets start date and time of the last break during shift.
+     *
+     * @param lastBreakStart start date and time of the last break during shift
+     */
     public void setLastBreakStart(Calendar lastBreakStart) {
         this.lastBreakStart = lastBreakStart;
     }
@@ -145,7 +184,7 @@ public class Shift {
     public long getWorkerId() {
         return workerId;
     }
-
+    
     public void setWorkerId(long workerId) {
         this.workerId = workerId;
     }
@@ -155,13 +194,16 @@ public class Shift {
         if (obj == null) {
             return false;
         }
+
         if (getClass() != obj.getClass()) {
             return false;
         }
+
         final Shift other = (Shift) obj;
         if (this.id != other.getId()) {
             return false;
         }
+
         return true;
     }
 
