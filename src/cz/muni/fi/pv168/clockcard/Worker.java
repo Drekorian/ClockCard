@@ -12,6 +12,7 @@ import java.util.Properties;
  * Class that represents worker who is using the ClockCard system.
  *
  * @author Marek Osvald
+ * @version 2011.0518
  */
 
 public class Worker {

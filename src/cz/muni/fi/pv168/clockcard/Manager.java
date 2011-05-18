@@ -11,6 +11,7 @@ import java.util.Map;
  *
  * @author Marek Osvald
  * @version 2011.0518
+ * 
  * TODO: Refactor - rename to Supervisor in order not to be mistaken with database manager classes
  */
 

@@ -1,8 +1,7 @@
 package cz.muni.fi.pv168.clockcard;
 
 /**
- * Exception class that is being thrown when manipulation with Shift's class
- * database backend failed.
+ * Exception being raised when illegal operation is ran on Shift object.
  *
  * @author David Stein
  * @author Marek Osvald
@@ -11,18 +10,17 @@ package cz.muni.fi.pv168.clockcard;
  */
 
 public class ShiftException extends Exception{
+    public ShiftException() { }
+    
     public ShiftException(Throwable cause) {
         super(cause);
-    }
-
-    public ShiftException(String message, Throwable cause) {
-        super(message, cause);
     }
 
     public ShiftException(String message) {
         super(message);
     }
-
-    public ShiftException() {
+    
+    public ShiftException(String message, Throwable cause) {
+        super(message, cause);
     }
 }
