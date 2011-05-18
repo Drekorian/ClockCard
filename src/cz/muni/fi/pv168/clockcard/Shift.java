@@ -1,13 +1,13 @@
 package cz.muni.fi.pv168.clockcard;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.*;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a shift worked by a worker.
@@ -18,13 +18,13 @@ import java.util.GregorianCalendar;
  * @version 2011.0518
  */
 
-public class Shift {
+public class Shift extends ADatabaseStoreable {
    //TODO: Refactor - create property file and load SQL queries from it
-   private final static String INSERT_SHIFT = "INSERT INTO APP.SHIFTS(worker_id, shift_start, shift_end, last_break, total_break_time) values(?,?,?,?,?)";
-   private final static String UPDATE_SHIFT = "UPDATE APP.SHIFTS SET shift_start=?,shift_end=?,last_break=?,total_break_time=?";
-   private final static String DELETE_SHIFT = "DELETE FROM APP.SHIFTS WHERE id=?";
+   private final static String PROPERTY_FILE = "src/Shift.properties";
 
-   private long id = 0;
+   private Properties properties = loadProperties();
+
+   private Long id;
    private long workerId = 0;
    private Calendar start = new GregorianCalendar(0, 0, 0, 0, 0, 0);
    private Calendar end = new GregorianCalendar(0, 0, 0, 0, 0, 0);
@@ -43,7 +43,7 @@ public class Shift {
     *
     * TODO: This seems to be COMPLETELY WRONG! Total misunderstanding of intended design.
     */
-    public Shift(long id, long workerId, Calendar start, Calendar end, Calendar lastBreakStart, long totalBreakTime){
+    public Shift(Long id, long workerId, Calendar start, Calendar end, Calendar lastBreakStart, long totalBreakTime){
         this.id = id;
         this.workerId = workerId;
         this.start = start;
@@ -53,47 +53,55 @@ public class Shift {
    }
 
     /**
-    * Parametric constructor. Creates shift based on worker's ID and date and time of the shift's start.
-    * @param workerId unique ID of the worker
-    * @param start date and time of the shift's starts
-    */
+     * Parametric constructor. Creates shift based on worker's ID and date and time of the shift's start.
+     * @param workerId unique ID of the worker
+     * @param start date and time of the shift's starts
+     */
     public Shift(long workerId, Calendar start) {
         this.workerId = workerId;
         this.start = start;
     }
 
-    /**
-     * Saves shift to the database.
-     *
-     * Provided that shift was created by a 2-parameter constructor, saves shift
-     * to the database and sets generated IS to this object. Otherwise just saves
-     * shift to the database.
-     *
-     * @throws SQLException
-     */
-    public void save() throws SQLException{
-        Connection con = ConnectionManager.getConnection();
-        
-        if (id == 0) {
-            PreparedStatement prepareStatement = con.prepareStatement(INSERT_SHIFT, Statement.RETURN_GENERATED_KEYS);
-            prepareStatement.setLong(1, workerId);
-            prepareStatement.setTimestamp(2, new Timestamp(start.getTimeInMillis()));
-            prepareStatement.setTimestamp(3, new Timestamp(end.getTimeInMillis()));
-            prepareStatement.setTimestamp(4, new Timestamp(lastBreakStart.getTimeInMillis()));
-            prepareStatement.setLong(5, totalBreakTime);
-            prepareStatement.execute();
-            
-            ResultSet result =  prepareStatement.getGeneratedKeys();
-            result.next();
-            id = result.getLong(1);
-        } else {
-            PreparedStatement prepareStatement = con.prepareStatement(UPDATE_SHIFT);
-            prepareStatement.setTimestamp(1, new Timestamp(start.getTimeInMillis()));
-            prepareStatement.setTimestamp(2, new Timestamp(end.getTimeInMillis()));
-            prepareStatement.setTimestamp(3, new Timestamp(lastBreakStart.getTimeInMillis()));
-            prepareStatement.setLong(4, totalBreakTime);
-            prepareStatement.executeUpdate();
+    @Override
+    public boolean save() {
+        Connection connection = null;
+        PreparedStatement preparedStatement;
+        ResultSet resultSet;
+        boolean result = false;
+
+        try {
+            connection = ConnectionManager.getConnection();
+
+            if (id == null) {
+                preparedStatement = connection.prepareStatement(properties.getProperty("saveQuery"), Statement.RETURN_GENERATED_KEYS);
+                preparedStatement.setLong(1, workerId);
+                preparedStatement.setTimestamp(2, new Timestamp(start.getTimeInMillis()));
+                preparedStatement.setTimestamp(3, new Timestamp(end.getTimeInMillis()));
+                preparedStatement.setTimestamp(4, new Timestamp(lastBreakStart.getTimeInMillis()));
+                preparedStatement.setLong(5, totalBreakTime);
+                resultSet = preparedStatement.executeQuery();
+                resultSet.next();
+                id = resultSet.getLong(1);
+                result = true;
+            } else {
+                preparedStatement = connection.prepareStatement(properties.getProperty("updateQuery"));
+                preparedStatement.setTimestamp(1, new Timestamp(start.getTimeInMillis()));
+                preparedStatement.setTimestamp(2, new Timestamp(end.getTimeInMillis()));
+                preparedStatement.setTimestamp(3, new Timestamp(lastBreakStart.getTimeInMillis()));
+                preparedStatement.setLong(4, totalBreakTime);
+                result = (preparedStatement.executeUpdate() == 1);
+            }
+        } catch (SQLException ex) {
+            //TODO: log an exception
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException ex) {
+                //TODO: log an exception
+            }
         }
+
+        return result;
     }
 
     /**
@@ -101,12 +109,28 @@ public class Shift {
      *
      * @throws SQLException
      */
-    public void destroy() throws SQLException{
-        //TODO: Returns WRONG return type. Should return BOOLEAN - true upon success and false otherwise.
-        Connection con = ConnectionManager.getConnection();
-        PreparedStatement prep = con.prepareStatement(DELETE_SHIFT);
-        prep.setLong(1, this.id);
-        prep.execute();
+    @Override
+    public boolean destroy() {
+        Connection connection = null;
+        PreparedStatement preparedStatement;
+        boolean result = false;
+
+        try {
+            connection = ConnectionManager.getConnection();
+            preparedStatement = connection.prepareStatement(properties.getProperty("deleteQuery"));
+            preparedStatement.setLong(1, id);
+            result = (preparedStatement.executeUpdate() == 1);
+        } catch (SQLException ex) {
+            //log an exception
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException ex) {
+                //TODO: log an exception
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -137,16 +161,6 @@ public class Shift {
     }
 
     /**
-     * Sets unique ID of the shift.
-     *
-     * @param id unique ID of the shift
-     */
-    public void setId(long id) {
-        //Bad smell in code. Get back to this.
-        this.id = id;
-    }
-
-    /**
      * Returns start date and time of the last break during shift.
      *
      * @return start date and time of the last break during shift
@@ -168,10 +182,6 @@ public class Shift {
         return start;
     }
 
-    public void setStart(Calendar start) {
-        this.start = start;
-    }
-
     public long getTotalBreakTime() {
         return totalBreakTime;
     }
@@ -184,10 +194,6 @@ public class Shift {
         return workerId;
     }
     
-    public void setWorkerId(long workerId) {
-        this.workerId = workerId;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass()) {
@@ -195,7 +201,7 @@ public class Shift {
         }
 
         final Shift other = (Shift) obj;
-        if (this.id != other.getID()) {
+        if (this.id != other.id) {
             return false;
         }
 
@@ -207,5 +213,18 @@ public class Shift {
         int hash = 7;
         hash = 59 * hash + (int) (this.id ^ (this.id >>> 32));
         return hash;
+    }
+
+    public static Properties loadProperties() {
+        try {
+            FileInputStream inputStream = new FileInputStream(PROPERTY_FILE);
+            Properties prop = new Properties();
+            prop.load(inputStream);
+            inputStream.close();
+            return prop;
+        } catch (IOException e) {
+            return new Properties();
+            //TODO: LOG fatal error, Property file not found.
+        }
     }
 }

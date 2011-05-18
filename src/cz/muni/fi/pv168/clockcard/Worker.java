@@ -4,12 +4,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Class that represents worker who is using the ClockCard system.
@@ -19,6 +15,8 @@ import java.util.logging.Logger;
  */
 
 public class Worker extends ADatabaseStoreable {
+    private static final String PROPERTY_FILE = "src/Worker.properties";
+
     private static final Properties properties = loadProperties();
 
     private Long id;
@@ -36,7 +34,7 @@ public class Worker extends ADatabaseStoreable {
      */
     public static Properties loadProperties() {
         try {
-            FileInputStream inputStream = new FileInputStream("src/Worker.properties");
+            FileInputStream inputStream = new FileInputStream(PROPERTY_FILE);
             Properties prop = new Properties();
             prop.load(inputStream);
             inputStream.close();
@@ -259,7 +257,6 @@ public class Worker extends ADatabaseStoreable {
         return new ArrayList<Shift>();
         //TODO implement return Shift.findByWorker(id);
     }
-
     /**
      * Saves worker into the database. Executes INSERT when worker is saved for
      * the first time, UPDATE otherwise.
@@ -267,10 +264,11 @@ public class Worker extends ADatabaseStoreable {
      * @return true when worker is successfuly saved, false otherwise
      * @throws SQLException
      */
+    @Override
     public boolean save() {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        int result = 0;
+        boolean result = false;
 
         try {
             connection = ConnectionManager.getConnection();
@@ -278,7 +276,7 @@ public class Worker extends ADatabaseStoreable {
             if (id == null) {
                 preparedStatement = connection.prepareStatement(properties.getProperty("saveQuery"));
             } else {
-                preparedStatement = connection.prepareStatement(properties.getProperty("updateQuery") + id);
+                preparedStatement = connection.prepareStatement(properties.getProperty("updateQuery"));
             }
 
             preparedStatement.setString(1, name);
@@ -291,8 +289,8 @@ public class Worker extends ADatabaseStoreable {
                 preparedStatement.setNull(5, Types.INTEGER);
             }
             preparedStatement.setBoolean(6, suspended);
-            
-            result = preparedStatement.executeUpdate();
+
+            result = (preparedStatement.executeUpdate() == 1);
         } catch (SQLException ex) {
             //TODO: log error
         } finally {
@@ -305,28 +303,29 @@ public class Worker extends ADatabaseStoreable {
             }
         }
 
-        return (result > 0);
+        return result;
     }
-    
     /**
      * Deletes matching record from the database. Provided that the selected
      * worker has not been saved to the database yet, only returns false.
      *
      * @return true when worker is successfuly deleted, false otherwise
      */
+    @Override
     public boolean destroy() {
         if (id == null) {
             return false;
         }
 
         Connection connection = null;
-        Statement statement;
-        int result = 0;
+        PreparedStatement preparedStatement;
+        boolean result = false;
 
         try {
             connection = ConnectionManager.getConnection();
-            statement = connection.createStatement();
-            result = statement.executeUpdate(properties.getProperty("deleteQuery") + id);
+            preparedStatement = connection.prepareStatement(properties.getProperty("deleteQuery"));
+            preparedStatement.setLong(1, id);
+            result = (preparedStatement.executeUpdate() == 1);
         } catch (SQLException ex) {
             //TODO: log
         } finally {
@@ -339,7 +338,7 @@ public class Worker extends ADatabaseStoreable {
             }
         }
 
-        return (result == 1);
+        return result;
     }
 
     @Override
