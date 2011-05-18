@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package cz.muni.fi.pv168.clockcard;
 
 import java.sql.Connection;
@@ -15,39 +10,46 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 /**
+ * Represents a shift worked by a worker.
  *
  * @author Marek Osvald
+ * @author David Stein
+ *
+ * @version 2011.0518
  */
 
 public class Shift {
-
+   //TODO: Refactor - create property file and load SQL queries from it
    private final static String INSERT_SHIFT = "INSERT INTO APP.SHIFTS(worker_id, shift_start,shift_end,last_break,total_break_time) values(?,?,?,?,?)";
    private final static String UPDATE_SHIFT = "UPDATE APP.SHIFTS SET shift_start=?,shift_end=?,last_break=?,total_break_time=?";
    private final static String DELETE_SHIFT = "DELETE FROM APP.SHIFTS WHERE id=?";
 
-   private long id=0;
-   private long workerId=0;
-   private Calendar start=new GregorianCalendar(0, 0, 0, 0, 0, 0);
-   private Calendar end=new GregorianCalendar(0, 0, 0, 0, 0, 0);
-   private Calendar lastBreakStart=new GregorianCalendar(0, 0, 0, 0, 0, 0);
-   private long totalBreakTime=0;
+   private long id = 0;
+   private long workerId = 0;
+   private Calendar start = new GregorianCalendar(0, 0, 0, 0, 0, 0);
+   private Calendar end = new GregorianCalendar(0, 0, 0, 0, 0, 0);
+   private Calendar lastBreakStart = new GregorianCalendar(0, 0, 0, 0, 0, 0);
+   private long totalBreakTime = 0;
 
    /**
-    * Constructor for manager
-    * @param id
-    * @param workerId
-    * @param start
-    * @param end
-    * @param lastBreakStart
-    * @param totalBreakTime
+    * Parametric constructor.
+    * 
+    * @param id unique ID of the shift
+    * @param workerId unique ID of the workrer
+    * @param start date and time of the shift's start
+    * @param end date and time of the shift's start
+    * @param lastBreakStart date and time of the start of the last break
+    * @param totalBreakTime total break time
+    *
+    * TODO: This seems to be COMPLETELY WRONG! Total misunderstanding of intended design.
     */
-   public Shift(long id,long workerId, Calendar start, Calendar end, Calendar lastBreakStart, long totalBreakTime){
-        this.id=id;
-        this.workerId=workerId;
-        this.start=start;
-        this.end=end;
-        this.lastBreakStart=lastBreakStart;
-        this.totalBreakTime=totalBreakTime;
+   public Shift(long id, long workerId, Calendar start, Calendar end, Calendar lastBreakStart, long totalBreakTime){
+        this.id = id;
+        this.workerId = workerId;
+        this.start = start;
+        this.end = end;
+        this.lastBreakStart = lastBreakStart;
+        this.totalBreakTime = totalBreakTime;
    }
 
    /**

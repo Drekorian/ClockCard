@@ -10,6 +10,8 @@ import java.util.Map;
  * Represents manager of the ClockCard system.
  *
  * @author Marek Osvald
+ * @version 2011.0518
+ * TODO: Refactor - rename to Supervisor in order not to be mistaken with database manager classes
  */
 
 public class Manager {
@@ -19,8 +21,7 @@ public class Manager {
     /**
      * Parameterless constructor.
      */
-    Manager() {
-    }
+    private Manager() { }
 
     public List<Worker> getWorkers() {
         //TODO implement (watch out for imports)
@@ -32,7 +33,6 @@ public class Manager {
         return new ArrayList<Shift>();
     }
 
-    
     public Map<Worker, Time> getWorkedTime() {
         //TODO implement (watch out for imports)
         return new HashMap<Worker, Time>();
