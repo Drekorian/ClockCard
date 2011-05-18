@@ -114,6 +114,34 @@ public class Worker {
         connection.close();
         return worker;
     }
+     /**
+     * Returns worker with the selected login from the database or null if the
+     * worker is not found.
+     *
+     * @param login ID of the worker to be found
+     * @return worker with the selected ID from the database or null if the
+     * worker is not found
+     */
+    public static Worker findByLogin(String login) throws SQLException {
+        Connection connection = ConnectionManager.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM APP.workers WHERE login=?");
+        preparedStatement.setString(1, login);
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        Worker worker = null;
+
+        if (resultSet.getFetchSize() == 1 && resultSet.next()) {
+            worker = new Worker(resultSet.getLong(1),
+                                resultSet.getString(2),
+                                resultSet.getString(3),
+                                resultSet.getString(4),
+                                resultSet.getString(5),
+                                resultSet.getLong(6),
+                                resultSet.getBoolean(7));
+        }
+        connection.close();
+        return worker;
+    }
     /**
      * Returns total number of workers in the database.
      *
