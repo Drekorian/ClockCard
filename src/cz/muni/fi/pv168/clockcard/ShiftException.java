@@ -5,6 +5,8 @@ package cz.muni.fi.pv168.clockcard;
  * database backend failed.
  *
  * @author David Stein
+ * @author Marek Osvald
+ * 
  * @version 2011.0518
  */
 

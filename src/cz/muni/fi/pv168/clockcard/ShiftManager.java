@@ -12,8 +12,10 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
- *  Class for manage shifts.
- * @author Fires
+ * Database backend manager for hangling Shift class.
+ *
+ * @author David Steing
+ * @version 2011.0518
  */
 
 public class ShiftManager {

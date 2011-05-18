@@ -33,7 +33,8 @@ public class ConnectionManager {
             try {
                 ConnectionManager.connection = ConnectionManager.ds.getConnection();
             } catch (SQLException ex) {
-                Logger.getLogger(TestPool.class.getName()).log(Level.SEVERE, null, ex);
+                //TODO: Resolve legacy code
+                //Logger.getLogger(TestPool.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
