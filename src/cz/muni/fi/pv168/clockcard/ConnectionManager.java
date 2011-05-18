@@ -18,6 +18,7 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 
 public class ConnectionManager {
     public static DataSource ds = null;
+    
 
     private static Connection connection = null;
     private static GenericObjectPool _pool = null;
@@ -27,17 +28,18 @@ public class ConnectionManager {
     }
 
     public static Connection getConnection() throws SQLException {
+        System.out.println("Chci spojeni :");
         if (ConnectionManager.connection == null) {
+            System.out.println("Vytvarim spojeni");
             ConnectionManager cm = new ConnectionManager(new DBConfiguration(false));
-
             try {
                 ConnectionManager.connection = ConnectionManager.ds.getConnection();
             } catch (SQLException ex) {
                 //TODO: Resolve legacy code
-                //Logger.getLogger(TestPool.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-
+        System.out.println("Spojeni existuje"+connection);
         return ConnectionManager.connection;
     }
 

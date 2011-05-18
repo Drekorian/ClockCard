@@ -108,11 +108,11 @@ public class ShiftManager implements IDatabaseManager {
             //TODO Log exception
         } finally {
             if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                    //Log an exception
-                }
+//                try {
+//                    connection.close();
+//                } catch (SQLException ex) {
+//                    //Log an exception
+//                }
             }
         }
         

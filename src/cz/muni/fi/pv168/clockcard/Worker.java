@@ -70,7 +70,7 @@ public class Worker extends ADatabaseStoreable {
                                 resultSet.getLong(6),
                                 resultSet.getBoolean(7));
         }
-        connection.close();
+        //connection.close();
         return worker;
     }
         

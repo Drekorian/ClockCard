@@ -11,10 +11,13 @@
 
 package cz.muni.fi.pv168.clockcard;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 /**
  *
@@ -128,27 +131,32 @@ public class LoginWorkerDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        String login = this.jTextField1.getText();
-        String password = String.valueOf(this.jPasswordField1.getPassword());
-        if (login.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Login and password have to be filled.", "Error", JOptionPane.ERROR_MESSAGE);
-        } else {
-            try {
-                Worker workerToLogin = Worker.findByLogin(login);
-                if (workerToLogin == null) {
-                    JOptionPane.showMessageDialog(null, "User dont exist", "Error", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    if(workerToLogin.authenticate(password)){
-                        System.out.println("uzivatel autorizovan");
-                    }else{
-                        JOptionPane.showMessageDialog(null, "Wrong password", "Error", JOptionPane.ERROR_MESSAGE);
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    String login = jTextField1.getText();
+                    String password = String.valueOf(jPasswordField1.getPassword());
+                    if (login.isEmpty() || password.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Login and password have to be filled.", "Error", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        try {
+                            Worker workerToLogin = Worker.findByLogin(login);
+                            if (workerToLogin == null) {
+                                JOptionPane.showMessageDialog(null, "User dont exist", "Error", JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                if (workerToLogin.authenticate(password)) {
+                                    System.out.println("uzivatel autorizovan");
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "Wrong password", "Error", JOptionPane.ERROR_MESSAGE);
+                                }
+                            }
+                        } catch (SQLException ex) {
+                            Logger.getLogger(LoginWorkerDialog.class.getName()).log(Level.SEVERE, null, ex);
+                            JOptionPane.showMessageDialog(null, "Error in DB.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
                     }
                 }
-            } catch (SQLException ex) {
-                Logger.getLogger(LoginWorkerDialog.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(null, "Error in DB.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
+            });
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
