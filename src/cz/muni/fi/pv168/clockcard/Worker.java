@@ -31,9 +31,6 @@ public class Worker {
      *
      * @return connection to the database.
      */
-    
-
-    
     /**
      * Loads properties from file.
      *
@@ -165,7 +162,6 @@ public class Worker {
         this.currentShift = Shift.find(currentShift);
         this.suspended = suspended;
     }
-
     
     /**
      * Parametric constructor. This constructor is used for objects that have
@@ -416,6 +412,4 @@ public class Worker {
     public int hashCode() {
         return (this.login != null ? this.login.hashCode() : 0);
     }
-
-    
 }

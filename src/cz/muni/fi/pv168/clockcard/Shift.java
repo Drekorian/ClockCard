@@ -191,11 +191,7 @@ public class Shift {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (getClass() != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
 
