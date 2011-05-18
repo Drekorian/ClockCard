@@ -18,7 +18,7 @@ public class Worker extends ADatabaseStoreable {
     private static final String PROPERTY_FILE = "src/Worker.properties";
 
     private static final Properties properties = loadProperties();
-
+    
     private Long id;
     private String name;
     private String surname;
@@ -54,7 +54,22 @@ public class Worker extends ADatabaseStoreable {
         worker.password = properties.getProperty("defaultPassword");
     }
 
-    //TODO: reimplement to use ShiftManager
+    /**
+     * TODO: Javadoc
+     *
+     * @param id
+     * @param name
+     * @param surname
+     * @param login
+     * @param password
+     * @param currentShift
+     * @param suspended
+     * @return
+     */
+    public static Worker loadWorker(long id, String name, String surname, String login, String password, long currentShift, boolean suspended) {
+        return new Worker(id, name, surname, login, password, currentShift, suspended);
+    }
+
     /**
      * Parametric constructor. This constructor is used to recreate objects that
      * have been previuosly stored in the database.
@@ -67,13 +82,13 @@ public class Worker extends ADatabaseStoreable {
      * @param currentShift id of the current pending shift
      * @param suspended true when worker is suspended, false otherwise
      */
-    public Worker(long id, String name, String surname, String login, String password, long currentShift, boolean suspended) {
+    private Worker(long id, String name, String surname, String login, String password, long currentShift, boolean suspended) {
         this.id = id;
         this.name = name;
         this.surname = surname;
         this.password = password;
         this.login = login;
-        //this.currentShift = Shift.find(currentShift);
+        this.currentShift = (Shift) ShiftManager.getInstance().find(currentShift);
         this.suspended = suspended;
     }
     
@@ -305,6 +320,7 @@ public class Worker extends ADatabaseStoreable {
 
         return result;
     }
+
     /**
      * Deletes matching record from the database. Provided that the selected
      * worker has not been saved to the database yet, only returns false.
