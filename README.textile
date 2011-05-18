@@ -10,7 +10,7 @@ h2. Authors
 h3. Tasks
 
 # UML diagrams
-## Use-case diagram (Marek) [100%] { 24. 2. - 2. 3. }
+## Use-case diagram %{color: red}(Marek)%% [100%] { 24. 2. - 2. 3. }
 ## Class diagram (Marek) [100%] { 3. 3. - 9. 3. }
 # Test methods
 ## Worker class test methods (Marek) [100%] { 10. 3. - 31. 3. }
