@@ -6,8 +6,6 @@ import java.sql.*;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Represents a shift worked by a worker.
@@ -17,40 +15,50 @@ import java.util.logging.Logger;
  *
  * @version 2011.0518
  */
-
 public class Shift extends ADatabaseStoreable {
-   //TODO: Refactor - create property file and load SQL queries from it
-   private final static String PROPERTY_FILE = "src/Shift.properties";
+    private final static String PROPERTY_FILE = "src/Shift.properties";
 
-   private Properties properties = loadProperties();
-
-   private Long id;
-   private long workerId = 0;
-   private Calendar start = new GregorianCalendar(0, 0, 0, 0, 0, 0);
-   private Calendar end = new GregorianCalendar(0, 0, 0, 0, 0, 0);
-   private Calendar lastBreakStart = new GregorianCalendar(0, 0, 0, 0, 0, 0);
-   private long totalBreakTime = 0;
+    private Properties properties = loadProperties();
+    private Long id;
+    private long workerId = 0;
+    private Calendar start = new GregorianCalendar(0, 0, 0, 0, 0, 0);
+    private Calendar end = new GregorianCalendar(0, 0, 0, 0, 0, 0);
+    private Calendar lastBreakStart = new GregorianCalendar(0, 0, 0, 0, 0, 0);
+    private long totalBreakTime = 0;
 
     /**
-    * Parametric constructor.
-    * 
-    * @param id unique ID of the shift
-    * @param workerId unique ID of the workrer
-    * @param start date and time of the shift's start
-    * @param end date and time of the shift's start
-    * @param lastBreakStart date and time of the start of the last break
-    * @param totalBreakTime total break time
-    *
-    * TODO: This seems to be COMPLETELY WRONG! Total misunderstanding of intended design.
-    */
-    public Shift(Long id, long workerId, Calendar start, Calendar end, Calendar lastBreakStart, long totalBreakTime){
+     * TODO: Javadoc me!
+     * 
+     * @param id
+     * @param workerID
+     * @param start
+     * @param end
+     * @param lastBreakStart
+     * @param totalBreakTime
+     * @return
+     */
+    public static Shift loadShift(Long id, long workerID, Calendar start, Calendar end, Calendar lastBreakStart, long totalBreakTime) {
+        return new Shift(id, workerID, start, end, lastBreakStart, totalBreakTime);
+    }
+
+    /**
+     * Parametric constructor.
+     *
+     * @param id unique ID of the shift
+     * @param workerId unique ID of the workrer
+     * @param start date and time of the shift's start
+     * @param end date and time of the shift's start
+     * @param lastBreakStart date and time of the start of the last break
+     * @param totalBreakTime total break time
+     */
+    private Shift(Long id, long workerID, Calendar start, Calendar end, Calendar lastBreakStart, long totalBreakTime) {
         this.id = id;
-        this.workerId = workerId;
+        this.workerId = workerID;
         this.start = start;
         this.end = end;
         this.lastBreakStart = lastBreakStart;
         this.totalBreakTime = totalBreakTime;
-   }
+    }
 
     /**
      * Parametric constructor. Creates shift based on worker's ID and date and time of the shift's start.
@@ -193,7 +201,7 @@ public class Shift extends ADatabaseStoreable {
     public long getWorkerId() {
         return workerId;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass()) {

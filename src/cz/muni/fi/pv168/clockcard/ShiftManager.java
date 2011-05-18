@@ -13,7 +13,7 @@ import java.util.Properties;
 /**
  * Database backend manager for handling Shift class.
  *
- * @author David Steing
+ * @author David Stein
  * @version 2011.0518
  */
 
@@ -97,12 +97,12 @@ public class ShiftManager implements IDatabaseManager {
                 shiftEnd.setTimeInMillis(resultSet.getTimestamp("SHIFT_END").getTime());
                 lastBreak.setTimeInMillis(resultSet.getTimestamp("LAST_BREAK").getTime());
 
-                result = new Shift(resultSet.getLong("ID"),
-                                   resultSet.getLong("WORKER_ID"),
-                                   shiftStart,
-                                   shiftEnd,
-                                   lastBreak,
-                                   resultSet.getLong("TOTAL_BREAK_TIME"));
+                result = Shift.loadShift(resultSet.getLong("ID"),
+                                         resultSet.getLong("WORKER_ID"),
+                                         shiftStart,
+                                         shiftEnd,
+                                         lastBreak,
+                                         resultSet.getLong("TOTAL_BREAK_TIME"));
             }
         } catch (SQLException ex) {
             //TODO Log exception
@@ -142,12 +142,12 @@ public class ShiftManager implements IDatabaseManager {
                 shiftEnd.setTimeInMillis(resultSet.getTimestamp("SHIFT_END").getTime());
                 lastBreak.setTimeInMillis(resultSet.getTimestamp("LAST_BREAK").getTime());
                 
-                Shift shift = new Shift(resultSet.getLong("ID"),
-                                        resultSet.getLong("WORKER_ID"),
-                                        shiftStart,
-                                        shiftEnd,
-                                        lastBreak,
-                                        resultSet.getLong("TOTAL_BREAK_TIME"));
+                Shift shift = Shift.loadShift(resultSet.getLong("ID"),
+                                              resultSet.getLong("WORKER_ID"),
+                                              shiftStart,
+                                              shiftEnd,
+                                              lastBreak,
+                                              resultSet.getLong("TOTAL_BREAK_TIME"));
                 result.add(shift);
             }
         } catch (SQLException ex) {
@@ -232,12 +232,12 @@ public class ShiftManager implements IDatabaseManager {
                 shiftEnd.setTimeInMillis(resultSet.getTimestamp("shift_end").getTime());
                 lastBreak.setTimeInMillis(resultSet.getTimestamp("last_break").getTime());
 
-                Shift shift = new Shift(resultSet.getLong("ID"),
-                                        resultSet.getLong("WORKER_ID"),
-                                        shiftStart,
-                                        shiftEnd,
-                                        lastBreak,
-                                        resultSet.getLong("TOTAL_BREAK_TIME"));
+                Shift shift = Shift.loadShift(resultSet.getLong("ID"),
+                                              resultSet.getLong("WORKER_ID"),
+                                              shiftStart,
+                                              shiftEnd,
+                                              lastBreak,
+                                              resultSet.getLong("TOTAL_BREAK_TIME"));
                 result.add(shift);
             }
         } catch (SQLException ex) {
