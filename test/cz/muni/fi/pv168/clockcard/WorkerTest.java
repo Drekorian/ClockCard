@@ -151,7 +151,7 @@ public class WorkerTest {
         ArrayList<Worker> dbWorkers = new ArrayList<Worker>();
         try {
             Worker.testingOn();
-            dbWorkers.addAll(Worker.all());
+            dbWorkers.addAll(WorkerManager.getAll());
             Worker.testingOff();
         } catch (SQLException ex) {
             fail("Workers retrieval caused an unexpected WorkerException.");
@@ -362,7 +362,7 @@ public class WorkerTest {
         }
 
         try {
-            Worker firstWorker = Worker.find(1);
+            Worker firstWorker = (Worker) WorkerManager.find(1);
             assertTrue("Database should be in the default state.", Worker.count() == LOGINS.length);
             assertTrue("Deleting the first Worker from the database failed.", firstWorker.destroy());
             assertTrue("Database should contain one less record than it's default state.", Worker.count() == LOGINS.length - 1);
@@ -371,6 +371,6 @@ public class WorkerTest {
             fail("Unable to retrieve the first worker in the database.");
         }
 
-        Worker.testingOff();
+        WorkerManager.testingOff();
     }
 }
