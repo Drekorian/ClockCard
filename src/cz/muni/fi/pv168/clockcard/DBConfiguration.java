@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package cz.muni.fi.pv168.clockcard;
 
 import java.io.FileInputStream;
@@ -12,9 +7,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * TODO: Purpose of DBConfiguration class?
+ * TODO: Documentation? Is this ours or 3rd party code?
  *
- * @author Fires
+ * @author David Stein
+ * @version 2011.0518
  */
+
 public class DBConfiguration {
 
     private static final String PROPERTIES_FILE = "src/Worker.properties";
@@ -25,11 +24,10 @@ public class DBConfiguration {
 
     private int dbPoolMinSize;
     private int dbPoolMaxSize;
-    private boolean productionMode=false;
-
+    private boolean productionMode = false;
 
     public DBConfiguration(boolean productionMode){
-        this.productionMode=productionMode;
+        this.productionMode = productionMode;
         this.setUp();
     }
 
@@ -39,25 +37,26 @@ public class DBConfiguration {
     
     public final void setUp(){
         Properties properties = new Properties();
+
         try {
             properties.load(new FileInputStream(PROPERTIES_FILE));
         } catch (IOException ex) {
             Logger.getLogger(DBConfiguration.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
         this.driverName = properties.getProperty("driverName");
         this.dbPoolMinSize = Integer.parseInt(properties.getProperty("dbPoolMinSize"));
         this.dbPoolMaxSize = Integer.parseInt(properties.getProperty("dbPoolMaxSize"));
 
-        if(this.productionMode){
+        if (this.productionMode) {
             this.dbUrl = properties.getProperty("productionDatabase");
             this.user = properties.getProperty("productionLogin");
             this.password = properties.getProperty("productionPassword");
-        }else{
+        } else {
             this.dbUrl = properties.getProperty("testDatabase");
             this.user = properties.getProperty("testLogin");
             this.password = properties.getProperty("testPassword");
         }
-
     }
 
     public int getDbPoolMaxSize() {
@@ -83,7 +82,4 @@ public class DBConfiguration {
     public String getUser() {
         return user;
     }
-
-    
-
 }
