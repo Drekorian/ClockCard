@@ -26,12 +26,12 @@ public class DBConfiguration {
     private int dbPoolMaxSize;
     private boolean productionMode = false;
 
-    public DBConfiguration(boolean productionMode){
+    public DBConfiguration(boolean productionMode) {
         this.productionMode = productionMode;
         this.setUp();
     }
 
-    public DBConfiguration(){
+    public DBConfiguration() {
         this.setUp();
     }
     

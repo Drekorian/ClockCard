@@ -12,7 +12,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
- * Database backend manager for hangling Shift class.
+ * Database backend manager for handling Shift class.
  *
  * @author David Steing
  * @version 2011.0518
@@ -122,5 +122,4 @@ public class ShiftManager {
         }
         return Collections.unmodifiableList(result);
     }
-
 }

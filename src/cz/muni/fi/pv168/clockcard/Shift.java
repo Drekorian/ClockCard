@@ -20,7 +20,7 @@ import java.util.GregorianCalendar;
 
 public class Shift {
    //TODO: Refactor - create property file and load SQL queries from it
-   private final static String INSERT_SHIFT = "INSERT INTO APP.SHIFTS(worker_id, shift_start,shift_end,last_break,total_break_time) values(?,?,?,?,?)";
+   private final static String INSERT_SHIFT = "INSERT INTO APP.SHIFTS(worker_id, shift_start, shift_end, last_break, total_break_time) values(?,?,?,?,?)";
    private final static String UPDATE_SHIFT = "UPDATE APP.SHIFTS SET shift_start=?,shift_end=?,last_break=?,total_break_time=?";
    private final static String DELETE_SHIFT = "DELETE FROM APP.SHIFTS WHERE id=?";
 
