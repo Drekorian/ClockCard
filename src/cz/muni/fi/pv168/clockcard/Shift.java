@@ -21,6 +21,7 @@ public class Shift extends ADatabaseStoreable {
     private Properties properties = loadProperties();
     private Long id;
     private long workerId = 0;
+
     private Calendar start = new GregorianCalendar(0, 0, 0, 0, 0, 0);
     private Calendar end = new GregorianCalendar(0, 0, 0, 0, 0, 0);
     private Calendar lastBreakStart = new GregorianCalendar(0, 0, 0, 0, 0, 0);

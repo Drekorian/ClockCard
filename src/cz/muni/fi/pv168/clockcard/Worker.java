@@ -220,12 +220,12 @@ public class Worker extends ADatabaseStoreable {
             throw new WorkerException("Worker has not a pending shift.");
         }
 
-        //TODO: Create instance of Calendar (current date and time)
+        //TODO: Create instance of Calendar?? (current date and time)
         currentShift = null;
     }
     
     public void startBreak() {
-        //TODO implement
+        
     }
 
     public void endBreak() {
