@@ -22,6 +22,14 @@ public class WorkerForm extends javax.swing.JFrame {
     public WorkerForm(Worker worker) {
         logedWorker = worker;
         initComponents();
+
+        //set gui to actual worker
+        logedUserLabel.setText(worker.getName()+" "+worker.getSurname());
+        Shift shift = worker.getCurrentShift();
+        if(shift!=null){
+            startShiftButton.setEnabled(false);
+        }
+
     }
 
     /** This method is called from within the constructor to
