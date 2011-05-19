@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -131,10 +132,14 @@ public class LoginWorkerDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        LoginWorker loginWorker = new LoginWorker();
+        loginWorker.execute();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    String login = jTextField1.getText();
+    class LoginWorker extends SwingWorker<Integer,Integer>{
+        @Override
+        protected Integer doInBackground() throws Exception {
+            String login = jTextField1.getText();
                     String password = String.valueOf(jPasswordField1.getPassword());
                     if (login.isEmpty() || password.isEmpty()) {
                         JOptionPane.showMessageDialog(null, "Login and password have to be filled.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -145,7 +150,8 @@ public class LoginWorkerDialog extends javax.swing.JDialog {
                                 JOptionPane.showMessageDialog(null, "User dont exist", "Error", JOptionPane.ERROR_MESSAGE);
                             } else {
                                 if (workerToLogin.authenticate(password)) {
-                                    System.out.println("uzivatel autorizovan");
+                                   System.out.println("Jsi autorizovany");
+                                    return 0;
                                 } else {
                                     JOptionPane.showMessageDialog(null, "Wrong password", "Error", JOptionPane.ERROR_MESSAGE);
                                 }
@@ -155,13 +161,10 @@ public class LoginWorkerDialog extends javax.swing.JDialog {
                             JOptionPane.showMessageDialog(null, "Error in DB.", "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     }
-                }
-            });
-    }//GEN-LAST:event_jButton1ActionPerformed
+        return 1;
+        }
+    }
 
-    /**
-    * @param args the command line arguments
-    */
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {

@@ -17,8 +17,10 @@ package cz.muni.fi.pv168.clockcard;
  */
 public class WorkerForm extends javax.swing.JFrame {
 
+    Worker logedWorker;
     /** Creates new form WorkerForm */
-    public WorkerForm() {
+    public WorkerForm(Worker worker) {
+        logedWorker = worker;
         initComponents();
     }
 
