@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
+import javax.sql.DataSource;
+import org.apache.commons.dbcp.BasicDataSource;
 
 /**
  * Database backend manager for handling Shift class.
@@ -24,6 +26,7 @@ public class ShiftManager implements IDatabaseManager {
 
     private final Properties properties = loadProperties();
     private boolean testingMode;
+    private DataSource dataSource;
 
     /**
      * Returns the sole instance of ShiftManager in the program. Provided that
@@ -44,7 +47,10 @@ public class ShiftManager implements IDatabaseManager {
      * Private in order to force creation of ShiftManager solely via getInstance()
      * method.
      */
-    private ShiftManager() { }
+    private ShiftManager() {
+        testingMode = false;
+        dataSource = getProductionDataSource();
+    }
 
     public long count() {
         Connection connection = null;
@@ -119,7 +125,7 @@ public class ShiftManager implements IDatabaseManager {
         return result;
     }
 
-    public List<ADatabaseStoreable> getAll() {
+    public List<Shift> getAll() {
         Connection connection = null;
         Statement statement;
         ResultSet resultSet;
@@ -195,11 +201,18 @@ public class ShiftManager implements IDatabaseManager {
     }   
 
     public void testingOff() {
-        testingMode = false;
+        if (testingMode) {
+            dataSource = getProductionDataSource();
+            testingMode = false;
+        }
+
     }
 
     public void testingOn() {
-        testingMode = true;
+        if (!testingMode) {
+            dataSource = getTestingDataSource();
+            testingMode = true;
+        }
     }
 
     /**
@@ -255,5 +268,27 @@ public class ShiftManager implements IDatabaseManager {
         }
 
         return null;
+    }
+
+    private DataSource getTestingDataSource() {
+        BasicDataSource testingDataSource = new BasicDataSource();
+        testingDataSource.setDriverClassName(properties.getProperty("driverName"));
+        testingDataSource.setUrl(properties.getProperty("testURL"));
+        testingDataSource.setUsername(properties.getProperty("testLogin"));
+        testingDataSource.setPassword(properties.getProperty("testPassword"));
+        return testingDataSource;
+    }
+
+    private DataSource getProductionDataSource() {
+        BasicDataSource productionDataSource = new BasicDataSource();
+        productionDataSource.setDriverClassName(properties.getProperty("driverName"));
+        productionDataSource.setUrl(properties.getProperty("productionURL"));
+        productionDataSource.setUsername(properties.getProperty("productionLogin"));
+        productionDataSource.setPassword(properties.getProperty("productionPassword"));
+        return productionDataSource;
+    }
+
+    public DataSource getDataSource() {
+        return dataSource;
     }
 }

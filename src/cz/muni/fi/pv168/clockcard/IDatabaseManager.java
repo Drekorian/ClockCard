@@ -2,6 +2,7 @@ package cz.muni.fi.pv168.clockcard;
 
 import java.util.List;
 import java.util.Properties;
+import javax.sql.DataSource;
 
 /**
  * Interface implemented by database managers.
@@ -16,7 +17,7 @@ public interface IDatabaseManager {
      * 
      * @return list of all records mapped via ORM
      */
-    List<ADatabaseStoreable> getAll();
+    List<? extends ADatabaseStoreable> getAll();
     /**
      * Finds database storeable object and returns it.
      * 
@@ -37,6 +38,13 @@ public interface IDatabaseManager {
      * Turns off the testing mode.
      */
     void testingOff();
+    /**
+     * TODO: JAVADOC ME!
+     *
+     * @return
+     */
+    DataSource getDataSource();
+
     /**
      * Retrieves properties from database manager property file.
      *
