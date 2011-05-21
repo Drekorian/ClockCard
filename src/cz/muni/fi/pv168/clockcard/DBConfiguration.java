@@ -15,16 +15,15 @@ import java.util.logging.Logger;
  */
 
 public class DBConfiguration {
-
     private static final String PROPERTIES_FILE = "src/Worker.properties";
+
     private String driverName;
     private String user;
     private String password;
     private String dbUrl;
-
     private int dbPoolMinSize;
     private int dbPoolMaxSize;
-    private boolean productionMode = false;
+    private boolean productionMode;
 
     public DBConfiguration(boolean productionMode) {
         this.productionMode = productionMode;
@@ -32,7 +31,7 @@ public class DBConfiguration {
     }
 
     public DBConfiguration() {
-        this.setUp();
+        this(false);
     }
     
     public final void setUp(){

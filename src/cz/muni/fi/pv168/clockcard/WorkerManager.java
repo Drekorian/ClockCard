@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import javax.sql.DataSource;
+import org.apache.commons.dbcp.BasicDataSource;
 
 /**
  * Database backend manager for handling Worker class.
@@ -19,9 +21,10 @@ public class WorkerManager implements IDatabaseManager {
     private static final String PROPERTY_FILE = "src/Worker.properties";
 
     private static WorkerManager instance;
-    private final Properties properties = loadProperties();
 
-    private boolean testingMode = false;
+    private final Properties properties = loadProperties();
+    private boolean testingMode;
+    private DataSource dataSource;
 
     /**
      * Returns the sole instance of WorkerManager in the program. Provided that
@@ -42,8 +45,12 @@ public class WorkerManager implements IDatabaseManager {
      * Private in order to force creation of WorkerManager solely via getInstance()
      * method.
      */
-    private WorkerManager() { }
+    private WorkerManager() {
+        testingMode = false;
+        dataSource = getProductionDataSource();
+    }
 
+    @Override
     public ADatabaseStoreable find(long id) {
         Connection connection = null;
         PreparedStatement preparedStatement;
@@ -51,7 +58,7 @@ public class WorkerManager implements IDatabaseManager {
         Worker result = null;
 
         try {
-            connection = ConnectionManager.getConnection();
+            connection = dataSource.getConnection();
             preparedStatement = connection.prepareStatement(properties.getProperty("findQuery"));
             preparedStatement.setLong(1, id);
             resultSet = preparedStatement.executeQuery();
@@ -80,14 +87,16 @@ public class WorkerManager implements IDatabaseManager {
         return result;
     }
 
-    public List<ADatabaseStoreable> getAll() {
+    @Override
+    public List<? extends ADatabaseStoreable> getAll() {
         Connection connection = null;
         Statement statement;
         ResultSet resultSet = null;
+
         ArrayList<ADatabaseStoreable> result = null;
 
         try {
-            connection = ConnectionManager.getConnection();
+            connection = dataSource.getConnection();
             statement = connection.createStatement();
             resultSet = statement.executeQuery(properties.getProperty("selectAllQuery"));
             result = new ArrayList<ADatabaseStoreable>();
@@ -121,6 +130,7 @@ public class WorkerManager implements IDatabaseManager {
         return null;
     }
 
+    @Override
     public long count() {
         Connection connection = null;
         Statement statement;
@@ -128,7 +138,7 @@ public class WorkerManager implements IDatabaseManager {
         int result = 0;
 
         try {
-            connection = ConnectionManager.getConnection();
+            connection = dataSource.getConnection();
             statement = connection.createStatement();
             statement.executeQuery(properties.getProperty("countQuery"));
 
@@ -150,14 +160,23 @@ public class WorkerManager implements IDatabaseManager {
         return result;
     }
 
+    @Override
     public void testingOn() {
-        testingMode = true;
+        if (!testingMode) {
+            dataSource = getTestingDataSource();
+            testingMode = true;
+        }
     }
 
+    @Override
     public void testingOff() {
-        testingMode = false;
+        if (testingMode) {
+            dataSource = getProductionDataSource();
+            testingMode = true;
+        }
     }
 
+    @Override
     public Properties loadProperties() {
         FileInputStream inputStream = null;
         Properties _properties = null;
@@ -183,5 +202,28 @@ public class WorkerManager implements IDatabaseManager {
         }
         
         return new Properties();
-    }    
+    }
+
+    @Override
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    private DataSource getTestingDataSource() {
+        BasicDataSource testingDataSource = new BasicDataSource();
+        testingDataSource.setDriverClassName(properties.getProperty("driverName"));
+        testingDataSource.setUrl(properties.getProperty("testURL"));
+        testingDataSource.setUsername(properties.getProperty("testLogin"));
+        testingDataSource.setPassword(properties.getProperty("testPassword"));
+        return testingDataSource;
+    }
+    
+    private DataSource getProductionDataSource() {
+        BasicDataSource productionDataSource = new BasicDataSource();
+        productionDataSource.setDriverClassName(properties.getProperty("driverName"));
+        productionDataSource.setUrl(properties.getProperty("productionURL"));
+        productionDataSource.setUsername(properties.getProperty("productionLogin"));
+        productionDataSource.setPassword(properties.getProperty("productionPassword"));
+        return productionDataSource;
+    }
 }

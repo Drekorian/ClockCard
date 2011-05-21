@@ -45,7 +45,7 @@ public class Worker extends ADatabaseStoreable {
         }
     }
 
-     /**
+    /**
      * Returns worker with the selected login from the database or null if the
      * worker is not found.
      *
@@ -315,7 +315,7 @@ public class Worker extends ADatabaseStoreable {
         boolean result = false;
 
         try {
-            connection = ConnectionManager.getConnection();
+            connection = WorkerManager.getInstance().getDataSource().getConnection();
 
             if (id == null) {
                 preparedStatement = connection.prepareStatement(properties.getProperty("saveQuery"));
@@ -367,7 +367,7 @@ public class Worker extends ADatabaseStoreable {
         boolean result = false;
 
         try {
-            connection = ConnectionManager.getConnection();
+            connection = WorkerManager.getInstance().getDataSource().getConnection();
             preparedStatement = connection.prepareStatement(properties.getProperty("deleteQuery"));
             preparedStatement.setLong(1, id);
             result = (preparedStatement.executeUpdate() == 1);
