@@ -12,8 +12,8 @@
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItem1">
               <Properties>
-                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
-                  <KeyStroke key="Ctrl+N"/>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="new newShiftAction()" type="code"/>
                 </Property>
                 <Property name="mnemonic" type="int" value="78"/>
                 <Property name="text" type="java.lang.String" value="New Shift"/>
@@ -133,7 +133,7 @@
                       <Component id="logedUserLabel" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Component id="startShiftButton" alignment="0" min="-2" pref="300" max="-2" attributes="0"/>
-                  <Component id="endShiftButton1" alignment="0" min="-2" pref="300" max="-2" attributes="0"/>
+                  <Component id="startBreakButton" alignment="0" min="-2" pref="300" max="-2" attributes="0"/>
                   <Component id="endShiftButton" alignment="0" min="-2" pref="300" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
@@ -151,7 +151,7 @@
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="startShiftButton" min="-2" pref="80" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="endShiftButton1" min="-2" pref="80" max="-2" attributes="0"/>
+              <Component id="startBreakButton" min="-2" pref="80" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="endShiftButton" min="-2" pref="80" max="-2" attributes="0"/>
               <EmptySpace max="32767" attributes="0"/>
@@ -177,10 +177,13 @@
     </Component>
     <Component class="javax.swing.JButton" name="startShiftButton">
       <Properties>
+        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="new newShiftAction()" type="code"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="New Shift"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JButton" name="endShiftButton1">
+    <Component class="javax.swing.JButton" name="startBreakButton">
       <Properties>
         <Property name="text" type="java.lang.String" value="Break"/>
         <Property name="enabled" type="boolean" value="false"/>

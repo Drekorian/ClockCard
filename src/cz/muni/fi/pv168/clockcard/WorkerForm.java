@@ -11,15 +11,62 @@
 
 package cz.muni.fi.pv168.clockcard;
 
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.JFrame;
+
 /**
  *
  * @author Fires
  */
 public class WorkerForm extends javax.swing.JFrame {
 
+    private Worker logedWorker;
+    private boolean hasCurrentShift = false;
+    private static WorkerForm window;
     /** Creates new form WorkerForm */
-    public WorkerForm() {
+    public WorkerForm(Worker worker) {
+        logedWorker = worker;
         initComponents();
+        //set gui to actual worker
+        logedUserLabel.setText(worker.getName()+" "+worker.getSurname());
+        Shift shift = worker.getCurrentShift();
+        if(shift!=null){
+            startShiftButton.setText("End shift");
+            startBreakButton.setEnabled(true);
+            this.hasCurrentShift=true;
+        }
+    }
+
+
+    class logoutAction extends AbstractAction{
+        public void actionPerformed(ActionEvent e) {
+           throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    class newShiftAction extends AbstractAction{
+        public void actionPerformed(ActionEvent e) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    class endShiftAction extends AbstractAction{
+        public void actionPerformed(ActionEvent e) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    class startBreakAction extends AbstractAction{
+        public void actionPerformed(ActionEvent e) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    class endBreakAction extends AbstractAction{
+        public void actionPerformed(ActionEvent e) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 
     /** This method is called from within the constructor to
@@ -35,7 +82,7 @@ public class WorkerForm extends javax.swing.JFrame {
         logedUserLabel = new javax.swing.JLabel();
         endShiftButton = new javax.swing.JButton();
         startShiftButton = new javax.swing.JButton();
-        endShiftButton1 = new javax.swing.JButton();
+        startBreakButton = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -58,15 +105,16 @@ public class WorkerForm extends javax.swing.JFrame {
 
         endShiftButton.setText("Logout");
 
+        startShiftButton.setAction(new newShiftAction());
         startShiftButton.setText("New Shift");
 
-        endShiftButton1.setText("Break");
-        endShiftButton1.setEnabled(false);
+        startBreakButton.setText("Break");
+        startBreakButton.setEnabled(false);
 
         jMenu1.setMnemonic('S');
         jMenu1.setText("Shift");
 
-        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItem1.setAction(new newShiftAction());
         jMenuItem1.setMnemonic('N');
         jMenuItem1.setText("New Shift");
         jMenu1.add(jMenuItem1);
@@ -132,7 +180,7 @@ public class WorkerForm extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(logedUserLabel))
                     .addComponent(startShiftButton, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(endShiftButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(startBreakButton, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(endShiftButton, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -146,7 +194,7 @@ public class WorkerForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(startShiftButton, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(endShiftButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(startBreakButton, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(endShiftButton, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -158,7 +206,6 @@ public class WorkerForm extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton endShiftButton;
-    private javax.swing.JButton endShiftButton1;
     private javax.swing.JLabel info1Label;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
@@ -173,6 +220,7 @@ public class WorkerForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JMenuItem jMenuItem8;
     private javax.swing.JLabel logedUserLabel;
+    private javax.swing.JButton startBreakButton;
     private javax.swing.JButton startShiftButton;
     // End of variables declaration//GEN-END:variables
 
