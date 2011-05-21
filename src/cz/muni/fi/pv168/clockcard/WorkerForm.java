@@ -11,8 +11,10 @@
 
 package cz.muni.fi.pv168.clockcard;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 
 /**
@@ -22,8 +24,7 @@ import javax.swing.JFrame;
 public class WorkerForm extends javax.swing.JFrame {
 
     private Worker logedWorker;
-    private boolean hasCurrentShift = false;
-    private static WorkerForm window;
+    private static boolean hasCurrentShift = false;
     /** Creates new form WorkerForm */
     public WorkerForm(Worker worker) {
         logedWorker = worker;
@@ -34,7 +35,7 @@ public class WorkerForm extends javax.swing.JFrame {
         if(shift!=null){
             startShiftButton.setText("End shift");
             startBreakButton.setEnabled(true);
-            this.hasCurrentShift=true;
+            WorkerForm.hasCurrentShift=true;
         }
     }
 
@@ -47,7 +48,11 @@ public class WorkerForm extends javax.swing.JFrame {
 
     class newShiftAction extends AbstractAction{
         public void actionPerformed(ActionEvent e) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            if(WorkerForm.hasCurrentShift){
+                
+            }else{
+
+            }
         }
     }
 
