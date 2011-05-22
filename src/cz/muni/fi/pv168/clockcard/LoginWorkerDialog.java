@@ -1,13 +1,7 @@
 package cz.muni.fi.pv168.clockcard;
 
-<<<<<<< HEAD
-=======
-import java.sql.SQLException;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
->>>>>>> 873db714ffbba09e6a5426d8314ec0df2ea72334
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
@@ -153,12 +147,11 @@ public class LoginWorkerDialog extends javax.swing.JDialog {
             ResourceBundle translationResource = ResourceBundle.getBundle("Translation", Locale.getDefault());
             String login = loginTextField.getText();
             String password = String.valueOf(passwordField.getPassword());
-<<<<<<< HEAD
-            okButton.setEnabled(false);
-            cancelButton.setEnabled(false);
-            infoLabel.setText("Vyčkejte přihlašuji.");
+            btnOk.setEnabled(false);
+            btnCancel.setEnabled(false);
+            infoLabel.setText(translationResource.getString("LoginWorkerDialog.logging"));
             if (login.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Login and password have to be filled.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, translationResource.getString("LoginWorkerDialog.notFilledFields"), translationResource.getString("LoginWorkerDialog.error"), JOptionPane.ERROR_MESSAGE);
             } else {
                 Worker workerToLogin = WorkerManager.getInstance().findByLogin(login);
                 if (workerToLogin == null) {
@@ -170,31 +163,6 @@ public class LoginWorkerDialog extends javax.swing.JDialog {
                         return 0;
                     } else {
                         JOptionPane.showMessageDialog(null, "Wrong password", "Error", JOptionPane.ERROR_MESSAGE);
-=======
-            btnOk.setEnabled(false);
-            btnCancel.setEnabled(false);
-            infoLabel.setText(translationResource.getString("LoginWorkerDialog.logging"));
-                    if (login.isEmpty() || password.isEmpty()) {
-                        JOptionPane.showMessageDialog(null, translationResource.getString("LoginWorkerDialog.notFilledFields"), translationResource.getString("LoginWorkerDialog.error"), JOptionPane.ERROR_MESSAGE);
-                    } else {
-                        try {
-                            Worker workerToLogin = Worker.findByLogin(login);
-                            if (workerToLogin == null) {
-                                JOptionPane.showMessageDialog(null, translationResource.getString("LoginWorkerDialog.userDontExist"), translationResource.getString("LoginWorkerDialog.error"), JOptionPane.ERROR_MESSAGE);
-                            } else {
-                                if (workerToLogin.authenticate(password)) {
-                                    this.parentWindow.setVisible(false);
-                                    new WorkerForm(workerToLogin).setVisible(true);
-                                    return 0;
-                                } else {
-                                    JOptionPane.showMessageDialog(null, translationResource.getString("LoginWorkerDialog.wrongPassword"), translationResource.getString("LoginWorkerDialog.error"), JOptionPane.ERROR_MESSAGE);
-                                }
-                            }
-                        } catch (SQLException ex) {
-                            Logger.getLogger(LoginWorkerDialog.class.getName()).log(Level.SEVERE, null, ex);
-                            JOptionPane.showMessageDialog(null, translationResource.getString("LoginWorkerDialog.errorInDb"), translationResource.getString("LoginWorkerDialog.error"), JOptionPane.ERROR_MESSAGE);
-                        }
->>>>>>> 873db714ffbba09e6a5426d8314ec0df2ea72334
                     }
                 }
             }
