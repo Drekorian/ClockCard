@@ -16,15 +16,20 @@ import org.apache.commons.dbcp.BasicDataSource;
  * Database backend manager for handling Shift class.
  *
  * @author David Stein
- * @version 2011.0518
+ * @author Marek Osvald
+ * @version 2011.0522
  */
 
+/* TODO: Consider refactoring with usage of inheritance. */
+
 public class ShiftManager implements IDatabaseManager {
-    private static final String PROPERTY_FILE = "src/Shift.properties";
+    private static final String DATABASE_PROPERTY_FILE = "src/Database.properties";
+    private static final String CLASS_PROPERTY_FILE = "src/Shift.properties";
 
     private static ShiftManager instance;
 
-    private final Properties properties = loadProperties();
+    private final Properties databaseProperties = loadProperties(DATABASE_PROPERTY_FILE);
+    private final Properties classProperties = loadProperties(CLASS_PROPERTY_FILE);
     private boolean testingMode;
     private DataSource dataSource;
 
@@ -43,8 +48,8 @@ public class ShiftManager implements IDatabaseManager {
     }
 
     /**
-     * Parameterless constructor.
-     * Private in order to force creation of ShiftManager solely via getInstance()
+     * Parameterless constructor. Private in order to force creating
+     * of ShiftManager solely via getInstance().
      * method.
      */
     private ShiftManager() {
@@ -52,43 +57,64 @@ public class ShiftManager implements IDatabaseManager {
         dataSource = getProductionDataSource();
     }
 
-    public long count() {
+    @Override
+    public List<? extends IDatabaseStoreable> getAll() {
         Connection connection = null;
         Statement statement;
         ResultSet resultSet;
-        long result = 0;
+        ArrayList<Shift> result = null;
 
         try {
-            connection = ConnectionManager.getConnection();
+            connection = dataSource.getConnection();
             statement = connection.createStatement();
-            resultSet = statement.executeQuery(properties.getProperty("countQuery"));
-            resultSet.next();
-            result = resultSet.getInt(1);
+            resultSet = statement.executeQuery(classProperties.getProperty("getAllQuery"));
+            result = new ArrayList<Shift>();
+
+            while (resultSet.next()) {
+                Calendar shiftStart, shiftEnd, lastBreak;
+
+                shiftStart = new GregorianCalendar();
+                shiftEnd   = new GregorianCalendar();
+                lastBreak  = new GregorianCalendar();
+
+                shiftStart.setTimeInMillis(resultSet.getTimestamp("SHIFT_START").getTime());
+                shiftEnd.setTimeInMillis(resultSet.getTimestamp("SHIFT_END").getTime());
+                lastBreak.setTimeInMillis(resultSet.getTimestamp("LAST_BREAK").getTime());
+
+                Shift shift = Shift.loadShift(resultSet.getLong("ID"),
+                                              resultSet.getLong("WORKER_ID"),
+                                              shiftStart,
+                                              shiftEnd,
+                                              lastBreak,
+                                              resultSet.getLong("TOTAL_BREAK_TIME"));
+                result.add(shift);
+            }
         } catch (SQLException ex) {
-            //TODO: Log error
+            //TODO: log an exception
         } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                    result = -1;
-                    //TODO: Log error
-                }
+            try {
+                connection.close();
+            } catch (SQLException ex) {
+                //log an exception
             }
         }
-        
-        return result;
-    }
 
-    public ADatabaseStoreable find(long id) {
+        if (result != null) {
+            return Collections.unmodifiableList(result);
+        }
+
+        return null;
+    }
+    @Override
+    public Shift find(long id) {
         Connection connection = null;
         PreparedStatement preparedStatement;
         ResultSet resultSet;
         Shift result = null;
 
         try {
-            connection = ConnectionManager.getConnection();
-            preparedStatement = connection.prepareStatement(properties.getProperty("findQuery"));
+            connection = dataSource.getConnection();
+            preparedStatement = connection.prepareStatement(classProperties.getProperty("findQuery"));
             preparedStatement.setLong(1, id);
             resultSet = preparedStatement.executeQuery();
 
@@ -114,71 +140,78 @@ public class ShiftManager implements IDatabaseManager {
             //TODO Log exception
         } finally {
             if (connection != null) {
-//                try {
-//                    connection.close();
-//                } catch (SQLException ex) {
-//                    //Log an exception
-//                }
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                    //Log an exception
+                }
             }
         }
         
         return result;
     }
-
-    public List<Shift> getAll() {
+    @Override
+    public long count() {
         Connection connection = null;
         Statement statement;
         ResultSet resultSet;
-        ArrayList<ADatabaseStoreable> result = null;
+        long result = 0;
 
         try {
-            connection = ConnectionManager.getConnection();
+            connection = dataSource.getConnection();
             statement = connection.createStatement();
-            resultSet = statement.executeQuery(properties.getProperty("getAllQuery"));
-            result = new ArrayList<ADatabaseStoreable>();
-
-            while (resultSet.next()) {
-                Calendar shiftStart, shiftEnd, lastBreak;
-
-                shiftStart = new GregorianCalendar();
-                shiftEnd   = new GregorianCalendar();
-                lastBreak  = new GregorianCalendar();
-
-                shiftStart.setTimeInMillis(resultSet.getTimestamp("SHIFT_START").getTime());
-                shiftEnd.setTimeInMillis(resultSet.getTimestamp("SHIFT_END").getTime());
-                lastBreak.setTimeInMillis(resultSet.getTimestamp("LAST_BREAK").getTime());
-                
-                Shift shift = Shift.loadShift(resultSet.getLong("ID"),
-                                              resultSet.getLong("WORKER_ID"),
-                                              shiftStart,
-                                              shiftEnd,
-                                              lastBreak,
-                                              resultSet.getLong("TOTAL_BREAK_TIME"));
-                result.add(shift);
+            resultSet = statement.executeQuery(classProperties.getProperty("countQuery"));
+            if (resultSet.next()) {
+                result = resultSet.getInt(1);
             }
         } catch (SQLException ex) {
-            //TODO: log an exception
+            //TODO: Log error
         } finally {
-            try {
-                connection.close();
-            } catch (SQLException ex) {
-                //log an exception
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                    result = -1;
+                    //TODO: Log error
+                }
             }
         }
-
-        if (result != null) {
-            return Collections.unmodifiableList(result);
+        
+        return result;
+    }
+    @Override
+    public boolean getTestingMode() {
+        return testingMode;
+    }
+    @Override
+    public void testingOn() {
+        if (!testingMode) {
+            dataSource = getTestingDataSource();
+            testingMode = true;
+        }
+    }
+    @Override
+    public void testingOff() {
+        if (testingMode) {
+            dataSource = getProductionDataSource();
+            testingMode = false;
+        }
+    }
+    @Override
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+    @Override
+    public Properties loadProperties(String fileName) {
+        if (fileName == null) {
+            throw new IllegalArgumentException("fileName cannot be null.");
         }
 
-        return null;
-    }
-
-    public Properties loadProperties() {
         FileInputStream inputStream = null;
         Properties _properties = null;
 
         try {
-            inputStream = new FileInputStream(PROPERTY_FILE);
+            inputStream = new FileInputStream(fileName);
             _properties = new Properties();
             _properties.load(inputStream);
         } catch (IOException e) {
@@ -198,39 +231,30 @@ public class ShiftManager implements IDatabaseManager {
         }
 
         return new Properties();
-    }   
-
-    public void testingOff() {
-        if (testingMode) {
-            dataSource = getProductionDataSource();
-            testingMode = false;
-        }
-
-    }
-
-    public void testingOn() {
-        if (!testingMode) {
-            dataSource = getTestingDataSource();
-            testingMode = true;
-        }
     }
 
     /**
-     * Method to get all shift what are assigned to worker.
-     * @param workerid
-     * @return List<Shift> list of shifts
-     * @throws SQLException
+     * Retrieves all shifts assgined to the worker with given unique ID. Provided
+     * that worker's ID is less or equal to zero, throw IllegalArgumentException.
+     *
+     * @param workerid unique ID of the worker
+     *
+     * @return shifts assigned to worker with given unique ID
      */
     public List<Shift> findByWorkerID(long workerid) {
+        if (workerid < 1) {
+            throw new IllegalArgumentException("Worker's ID must be greater than zero.");
+        }
+
         Connection connection = null;
         PreparedStatement statement;
         ResultSet resultSet;
         ArrayList<Shift> result = null;
 
         try {
-            connection = ConnectionManager.getConnection();
+            connection = dataSource.getConnection();
             result = new ArrayList<Shift>();
-            statement = connection.prepareStatement(properties.getProperty("findByWorkerIDQuery"));
+            statement = connection.prepareStatement(classProperties.getProperty("findByWorkerIDQuery"));
             statement.setLong(1, workerid);
             resultSet = statement.executeQuery();
 
@@ -270,25 +294,30 @@ public class ShiftManager implements IDatabaseManager {
         return null;
     }
 
+    /**
+     * Returns new DataSource representing a connection to the testing database.
+     * 
+     * @return new DataSource representing a connection to the testing database
+     */
     private DataSource getTestingDataSource() {
         BasicDataSource testingDataSource = new BasicDataSource();
-        testingDataSource.setDriverClassName(properties.getProperty("driverName"));
-        testingDataSource.setUrl(properties.getProperty("testURL"));
-        testingDataSource.setUsername(properties.getProperty("testLogin"));
-        testingDataSource.setPassword(properties.getProperty("testPassword"));
+        testingDataSource.setDriverClassName(databaseProperties.getProperty("driverName"));
+        testingDataSource.setUrl(databaseProperties.getProperty("testDatabase"));
+        testingDataSource.setUsername(databaseProperties.getProperty("testLogin"));
+        testingDataSource.setPassword(databaseProperties.getProperty("testPassword"));
         return testingDataSource;
     }
-
+    /**
+     * Returns new DataSource representing a connection to the production database.
+     *
+     * @return new DataSource representing a connection to the production database
+     */
     private DataSource getProductionDataSource() {
         BasicDataSource productionDataSource = new BasicDataSource();
-        productionDataSource.setDriverClassName(properties.getProperty("driverName"));
-        productionDataSource.setUrl(properties.getProperty("productionURL"));
-        productionDataSource.setUsername(properties.getProperty("productionLogin"));
-        productionDataSource.setPassword(properties.getProperty("productionPassword"));
+        productionDataSource.setDriverClassName(databaseProperties.getProperty("driverName"));
+        productionDataSource.setUrl(databaseProperties.getProperty("productionDatabase"));
+        productionDataSource.setUsername(databaseProperties.getProperty("productionLogin"));
+        productionDataSource.setPassword(databaseProperties.getProperty("productionPassword"));
         return productionDataSource;
-    }
-
-    public DataSource getDataSource() {
-        return dataSource;
     }
 }

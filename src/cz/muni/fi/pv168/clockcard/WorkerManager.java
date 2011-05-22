@@ -14,15 +14,19 @@ import org.apache.commons.dbcp.BasicDataSource;
  * Database backend manager for handling Worker class.
  *
  * @author Marek Osvald
- * @version 2011.0518
+ * @version 2011.0522
  */
 
+/* TODO: Consider refactoring with usage of inheritance. */
+
 public class WorkerManager implements IDatabaseManager {
-    private static final String PROPERTY_FILE = "src/Worker.properties";
+    private static final String DATABASE_PROPERTY_FILE = "src/Database.properties";
+    private static final String CLASS_PROPERTY_FILE = "src/Worker.properties";
 
     private static WorkerManager instance;
 
-    private final Properties properties = loadProperties();
+    private final Properties databaseProperties = loadProperties(DATABASE_PROPERTY_FILE);
+    private final Properties classProperties = loadProperties(CLASS_PROPERTY_FILE);
     private boolean testingMode;
     private DataSource dataSource;
 
@@ -41,8 +45,8 @@ public class WorkerManager implements IDatabaseManager {
     }
 
     /**
-     * Parameterless constructor.
-     * Private in order to force creation of WorkerManager solely via getInstance()
+     * Parameterless constructor. Private in order to force creation
+     * of WorkerManager solely via getInstance()
      * method.
      */
     private WorkerManager() {
@@ -51,7 +55,7 @@ public class WorkerManager implements IDatabaseManager {
     }
 
     @Override
-    public ADatabaseStoreable find(long id) {
+    public Worker find(long id) {
         Connection connection = null;
         PreparedStatement preparedStatement;
         ResultSet resultSet;
@@ -59,7 +63,7 @@ public class WorkerManager implements IDatabaseManager {
 
         try {
             connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement(properties.getProperty("findQuery"));
+            preparedStatement = connection.prepareStatement(classProperties.getProperty("findQuery"));
             preparedStatement.setLong(1, id);
             resultSet = preparedStatement.executeQuery();
 
@@ -79,27 +83,26 @@ public class WorkerManager implements IDatabaseManager {
                 try {
                     connection.close();
                 } catch (SQLException ex) {
-                    //TODO: Handle exception (logging, error message,...)
+                    //TODO: Log some crap
                 }
             }
         }
         
         return result;
     }
-
     @Override
-    public List<? extends ADatabaseStoreable> getAll() {
+    public List<Worker> getAll() {
         Connection connection = null;
         Statement statement;
         ResultSet resultSet = null;
 
-        ArrayList<ADatabaseStoreable> result = null;
+        ArrayList<Worker> result = null;
 
         try {
             connection = dataSource.getConnection();
             statement = connection.createStatement();
-            resultSet = statement.executeQuery(properties.getProperty("selectAllQuery"));
-            result = new ArrayList<ADatabaseStoreable>();
+            resultSet = statement.executeQuery(classProperties.getProperty("selectAllQuery"));
+            result = new ArrayList<Worker>();
             
             while (resultSet.next()) {
                 Worker worker = Worker.loadWorker(resultSet.getLong("ID"),
@@ -118,7 +121,7 @@ public class WorkerManager implements IDatabaseManager {
                 try {
                     connection.close();
                 } catch (SQLException ex) {
-                    //TODO: Handle the exception
+                    //TODO: Log some crap
                 }
             }
         }
@@ -129,7 +132,6 @@ public class WorkerManager implements IDatabaseManager {
 
         return null;
     }
-
     @Override
     public long count() {
         Connection connection = null;
@@ -140,10 +142,11 @@ public class WorkerManager implements IDatabaseManager {
         try {
             connection = dataSource.getConnection();
             statement = connection.createStatement();
-            statement.executeQuery(properties.getProperty("countQuery"));
+            resultSet = statement.executeQuery(classProperties.getProperty("countQuery"));
 
-            resultSet.next();
-            result = resultSet.getInt(1);
+            if (resultSet.next()) {
+                result = resultSet.getInt(1);
+            }
         } catch (SQLException ex) {
             result = -1;
             //TODO: handle the exception (logging, error message)
@@ -152,14 +155,17 @@ public class WorkerManager implements IDatabaseManager {
                 try {
                     connection.close();
                 } catch (SQLException ex) {
-                    //TODO: Handle the exception (logging, error message)
+                    //TODO: Log some crap
                 }
             }
         }
         
         return result;
     }
-
+    @Override
+    public boolean getTestingMode() {
+        return testingMode;
+    }
     @Override
     public void testingOn() {
         if (!testingMode) {
@@ -167,22 +173,28 @@ public class WorkerManager implements IDatabaseManager {
             testingMode = true;
         }
     }
-
     @Override
     public void testingOff() {
         if (testingMode) {
             dataSource = getProductionDataSource();
-            testingMode = true;
+            testingMode = false;
         }
     }
-
     @Override
-    public Properties loadProperties() {
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+    @Override
+    public Properties loadProperties(String fileName) {
+        if (fileName == null) {
+            throw new IllegalArgumentException("fileName cannot be null.");
+        }
+
         FileInputStream inputStream = null;
         Properties _properties = null;
         
         try {
-            inputStream = new FileInputStream(PROPERTY_FILE);
+            inputStream = new FileInputStream(fileName);
             _properties = new Properties();
             _properties.load(inputStream);
         } catch (IOException e) {
@@ -204,26 +216,74 @@ public class WorkerManager implements IDatabaseManager {
         return new Properties();
     }
 
-    @Override
-    public DataSource getDataSource() {
-        return dataSource;
+    /**
+     * Returns worker with the selected login from the database or null if the
+     * worker is not found.
+     *
+     * @param login ID of the worker to be found
+     * @return worker with the selected ID from the database or null if the
+     * worker is not found
+     */
+    public Worker findByLogin(String login) {
+        Connection connection = null;
+        PreparedStatement preparedStatement;
+        ResultSet resultSet;
+        Worker result = null;
+
+        try {
+            connection = WorkerManager.getInstance().getDataSource().getConnection();
+            preparedStatement = connection.prepareStatement(classProperties.getProperty("findByLoginQuery"));
+            resultSet = preparedStatement.executeQuery();
+            preparedStatement.setString(1, login);
+
+            if (resultSet.getFetchSize() == 1 && resultSet.next()) {
+                result = Worker.loadWorker(resultSet.getLong(1),
+                                           resultSet.getString(2),
+                                           resultSet.getString(3),
+                                           resultSet.getString(4),
+                                           resultSet.getString(5),
+                                           resultSet.getLong(6),
+                                           resultSet.getBoolean(7));
+            }
+        } catch (SQLException ex) {
+            //TODO: log.
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                    //TODO: log
+                }
+            }
+        }
+
+        return result;
     }
 
+    /**
+     * Returns new DataSource representing a connection to the production database.
+     *
+     * @return new DataSource representing a connection to the production database
+     */
     private DataSource getTestingDataSource() {
         BasicDataSource testingDataSource = new BasicDataSource();
-        testingDataSource.setDriverClassName(properties.getProperty("driverName"));
-        testingDataSource.setUrl(properties.getProperty("testURL"));
-        testingDataSource.setUsername(properties.getProperty("testLogin"));
-        testingDataSource.setPassword(properties.getProperty("testPassword"));
+        testingDataSource.setDriverClassName(databaseProperties.getProperty("driverName"));
+        testingDataSource.setUrl(databaseProperties.getProperty("testDatabase"));
+        testingDataSource.setUsername(databaseProperties.getProperty("testLogin"));
+        testingDataSource.setPassword(databaseProperties.getProperty("testPassword"));
         return testingDataSource;
     }
-    
+    /**
+     * Returns new DataSource representing a connection to the production database.
+     *
+     * @return new DataSource representing a connection to the production database
+     */
     private DataSource getProductionDataSource() {
         BasicDataSource productionDataSource = new BasicDataSource();
-        productionDataSource.setDriverClassName(properties.getProperty("driverName"));
-        productionDataSource.setUrl(properties.getProperty("productionURL"));
-        productionDataSource.setUsername(properties.getProperty("productionLogin"));
-        productionDataSource.setPassword(properties.getProperty("productionPassword"));
+        productionDataSource.setDriverClassName(databaseProperties.getProperty("driverName"));
+        productionDataSource.setUrl(databaseProperties.getProperty("productionDatabase"));
+        productionDataSource.setUsername(databaseProperties.getProperty("productionLogin"));
+        productionDataSource.setPassword(databaseProperties.getProperty("productionPassword"));
         return productionDataSource;
     }
 }

@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package cz.muni.fi.pv168.clockcard;
 
 import java.sql.Connection;
@@ -20,7 +15,7 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author Fires
+ * @author David Stein
  */
 public class ShiftTest {
 
@@ -47,11 +42,11 @@ public class ShiftTest {
      * Test of save method, of class Shift.
      */
     @Test
-    public void testSave() throws Exception {
-        Shift smena = new Shift(10, new GregorianCalendar());
-            smena.save();
-        System.out.println(smena.getID());
-        assertTrue(smena.equals(ShiftManager.getById(smena.getID())));
+    public void testSave() {
+        Shift shift = new Shift(10, new GregorianCalendar());
+            shift.save();
+        System.out.println(shift.getID());
+        assertTrue(shift.equals(ShiftManager.getById(shift.getID())));
     }
 
     /**

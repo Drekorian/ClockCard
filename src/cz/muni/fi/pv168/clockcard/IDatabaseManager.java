@@ -8,7 +8,7 @@ import javax.sql.DataSource;
  * Interface implemented by database managers.
  *
  * @author Marek Osvald
- * @version 2011.0518
+ * @version 2011.0522
  */
 
 public interface IDatabaseManager {
@@ -17,19 +17,25 @@ public interface IDatabaseManager {
      * 
      * @return list of all records mapped via ORM
      */
-    List<? extends ADatabaseStoreable> getAll();
+    List<? extends IDatabaseStoreable> getAll();
     /**
-     * Finds database storeable object and returns it.
+     * Finds database storeable object in the database and returns it.
      * 
      * @return provided that object with selected ID exists an database storeable object, null otherwise
      */
-    ADatabaseStoreable find(long id);
+    IDatabaseStoreable find(long id);
     /**
      * Counts all records in the table.
      *
      * @return total of the records
      */
     long count();
+    /**
+     * Returns whether testing mode is on.
+     *
+     * @return true when testing mode is on, false otherwise.
+     */
+    boolean getTestingMode();
     /**
      * Turns on the testing mode.
      */
@@ -39,16 +45,16 @@ public interface IDatabaseManager {
      */
     void testingOff();
     /**
-     * TODO: JAVADOC ME!
+     * Returns manager's DataSource.
      *
-     * @return
+     * @return manager's DataSource
      */
     DataSource getDataSource();
-
     /**
-     * Retrieves properties from database manager property file.
+     * Retrieves properties from given property file.
      *
-     * @return database manager properties
+     * @param fileName path and filename of the property file
+     * @return properties loaded from the property file
      */
-    Properties loadProperties();
+    Properties loadProperties(String fileName);
 }

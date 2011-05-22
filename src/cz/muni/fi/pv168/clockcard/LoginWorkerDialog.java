@@ -1,28 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * LoginWorkerDialog.java
- *
- * Created on 5.5.2011, 17:25:26
- */
-
 package cz.muni.fi.pv168.clockcard;
 
-import com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators.ParentIterator;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 /**
  *
- * @author Marek
+ * @author David Stein
  */
+
 public class LoginWorkerDialog extends javax.swing.JDialog {
 
     /** Creates new form LoginWorkerDialog */
@@ -156,28 +141,23 @@ public class LoginWorkerDialog extends javax.swing.JDialog {
             okButton.setEnabled(false);
             cancelButton.setEnabled(false);
             infoLabel.setText("Vyčkejte přihlašuji.");
-                    if (login.isEmpty() || password.isEmpty()) {
-                        JOptionPane.showMessageDialog(null, "Login and password have to be filled.", "Error", JOptionPane.ERROR_MESSAGE);
+            if (login.isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Login and password have to be filled.", "Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+                Worker workerToLogin = WorkerManager.getInstance().findByLogin(login);
+                if (workerToLogin == null) {
+                    JOptionPane.showMessageDialog(null, "User doesn't exist", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    if (workerToLogin.authenticate(password)) {
+                        this.parentWindow.setVisible(false);
+                        new WorkerForm(workerToLogin).setVisible(true);
+                        return 0;
                     } else {
-                        try {
-                            Worker workerToLogin = Worker.findByLogin(login);
-                            if (workerToLogin == null) {
-                                JOptionPane.showMessageDialog(null, "User dont exist", "Error", JOptionPane.ERROR_MESSAGE);
-                            } else {
-                                if (workerToLogin.authenticate(password)) {
-                                    this.parentWindow.setVisible(false);
-                                    new WorkerForm(workerToLogin).setVisible(true);
-                                    return 0;
-                                } else {
-                                    JOptionPane.showMessageDialog(null, "Wrong password", "Error", JOptionPane.ERROR_MESSAGE);
-                                }
-                            }
-                        } catch (SQLException ex) {
-                            Logger.getLogger(LoginWorkerDialog.class.getName()).log(Level.SEVERE, null, ex);
-                            JOptionPane.showMessageDialog(null, "Error in DB.", "Error", JOptionPane.ERROR_MESSAGE);
-                        }
+                        JOptionPane.showMessageDialog(null, "Wrong password", "Error", JOptionPane.ERROR_MESSAGE);
                     }
-        return 1;
+                }
+            }
+            return 1;
         }
 
         @Override
