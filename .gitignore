@@ -3,6 +3,7 @@
 
 # logs
 *.log
+*.ctrl
 
 # locks
 *.lock

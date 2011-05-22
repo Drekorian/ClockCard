@@ -13,12 +13,8 @@ package cz.muni.fi.pv168.clockcard;
 
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 
 /**
- *
  * @author Fires
  */
 public class LoginForm extends javax.swing.JFrame {
@@ -26,6 +22,7 @@ public class LoginForm extends javax.swing.JFrame {
     /** Creates new form LoginForm */
     public LoginForm() {
         initComponents();
+        
     }
 
     /** This method is called from within the constructor to
@@ -37,8 +34,8 @@ public class LoginForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        loginAsWorkerButton = new javax.swing.JButton();
-        loginAsManagerButton = new javax.swing.JButton();
+        btnLoginAsWorker = new javax.swing.JButton();
+        btnLoginAsManager = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         loginMenu = new javax.swing.JMenu();
         loginAsWorkerMenuItem = new javax.swing.JMenuItem();
@@ -48,30 +45,31 @@ public class LoginForm extends javax.swing.JFrame {
         jMenuItem3 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("ClockCard");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Translation"); // NOI18N
+        setTitle(bundle.getString("LoginForm.title")); // NOI18N
 
-        loginAsWorkerButton.setAction(new LoginAsWorkerAction());
-        loginAsWorkerButton.setText("Login as Worker");
+        btnLoginAsWorker.setAction(new LoginAsWorkerAction());
+        btnLoginAsWorker.setText(bundle.getString("LoginForm.btnLoginAsWorker.text")); // NOI18N
 
-        loginAsManagerButton.setAction(new LoginAsManagerAction());
-        loginAsManagerButton.setMnemonic('M');
-        loginAsManagerButton.setText("Login as Manager");
+        btnLoginAsManager.setAction(new LoginAsManagerAction());
+        btnLoginAsManager.setMnemonic('M');
+        btnLoginAsManager.setText(bundle.getString("LoginForm.btnLoginAsManager.text")); // NOI18N
 
         loginMenu.setMnemonic('L');
-        loginMenu.setText("Login");
+        loginMenu.setText(bundle.getString("LoginForm.loginMenu.text")); // NOI18N
 
         loginAsWorkerMenuItem.setAction(new LoginAsWorkerAction());
         loginAsWorkerMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_W, java.awt.event.InputEvent.ALT_MASK));
-        loginAsWorkerMenuItem.setText("Login as Worker");
+        loginAsWorkerMenuItem.setText(bundle.getString("LoginForm.loginAsWorkerMenuItem.text")); // NOI18N
         loginMenu.add(loginAsWorkerMenuItem);
 
         loginAsManagerMenuItem.setAction(new LoginAsManagerAction());
         loginAsManagerMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.event.InputEvent.ALT_MASK));
-        loginAsManagerMenuItem.setText("Login as Manager");
+        loginAsManagerMenuItem.setText(bundle.getString("LoginForm.loginAsManagerMenuItem.text")); // NOI18N
         loginMenu.add(loginAsManagerMenuItem);
 
         exitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_MASK));
-        exitMenuItem.setText("Exit");
+        exitMenuItem.setText(bundle.getString("LoginForm.exitMenuItem.text")); // NOI18N
         exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exitMenuItemActionPerformed(evt);
@@ -82,10 +80,10 @@ public class LoginForm extends javax.swing.JFrame {
         jMenuBar1.add(loginMenu);
 
         helpMenu.setMnemonic('H');
-        helpMenu.setText("Help");
+        helpMenu.setText(bundle.getString("LoginForm.helpMenu.text")); // NOI18N
 
         jMenuItem3.setMnemonic('A');
-        jMenuItem3.setText("About");
+        jMenuItem3.setText(bundle.getString("LoginForm.jMenuItem3.text")); // NOI18N
         jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItem3ActionPerformed(evt);
@@ -104,17 +102,17 @@ public class LoginForm extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(84, 84, 84)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(loginAsManagerButton, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(loginAsWorkerButton, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnLoginAsManager, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnLoginAsWorker, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(70, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(50, 50, 50)
-                .addComponent(loginAsWorkerButton, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnLoginAsWorker, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(loginAsManagerButton, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnLoginAsManager, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(57, Short.MAX_VALUE))
         );
 
@@ -132,7 +130,6 @@ public class LoginForm extends javax.swing.JFrame {
     /**
     * @param args the command line arguments
     */
-
     private static LoginForm mainFrame ;
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -161,13 +158,13 @@ public class LoginForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnLoginAsManager;
+    private javax.swing.JButton btnLoginAsWorker;
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu helpMenu;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem3;
-    private javax.swing.JButton loginAsManagerButton;
     private javax.swing.JMenuItem loginAsManagerMenuItem;
-    private javax.swing.JButton loginAsWorkerButton;
     private javax.swing.JMenuItem loginAsWorkerMenuItem;
     private javax.swing.JMenu loginMenu;
     // End of variables declaration//GEN-END:variables
