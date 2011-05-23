@@ -195,4 +195,19 @@ public class WorkerManagerTest {
         }
         connection.close();
     }
+
+    @Test
+    public void testFindByLogin() {
+        try {
+            resetTable();
+        } catch (SQLException ex) {
+            fail("Unable to reset table.");
+        }
+
+        for (int i = 0; i < LOGINS.length; i++) {
+            Worker originalWorker = new Worker(NAMES[i], SURNAMES[i], LOGINS[i]);
+            Worker dbWorker = WorkerManager.getInstance().findByLogin(LOGINS[i]);
+            assertEquals(originalWorker, dbWorker);
+        }
+    }
 }

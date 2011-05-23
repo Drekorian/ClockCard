@@ -227,14 +227,14 @@ public class WorkerManager implements IDatabaseManager {
     public Worker findByLogin(String login) {
         Connection connection = null;
         PreparedStatement preparedStatement;
-        ResultSet resultSet;
+        ResultSet resultSet = null;
         Worker result = null;
 
         try {
             connection = WorkerManager.getInstance().getDataSource().getConnection();
             preparedStatement = connection.prepareStatement(classProperties.getProperty("findByLoginQuery"));
-            resultSet = preparedStatement.executeQuery();
             preparedStatement.setString(1, login);
+            resultSet = preparedStatement.executeQuery();
 
             if (resultSet.getFetchSize() == 1 && resultSet.next()) {
                 result = Worker.loadWorker(resultSet.getLong(1),
