@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 
@@ -54,7 +56,8 @@ public class ShiftManager implements IDatabaseManager {
      */
     private ShiftManager() {
         testingMode = false;
-        dataSource = getProductionDataSource();
+        //dataSource = getProductionDataSource();
+          dataSource = getTestingDataSource();
     }
 
     @Override
@@ -124,11 +127,10 @@ public class ShiftManager implements IDatabaseManager {
                 shiftStart = new GregorianCalendar();
                 shiftEnd   = new GregorianCalendar();
                 lastBreak  = new GregorianCalendar();
-
                 shiftStart.setTimeInMillis(resultSet.getTimestamp("SHIFT_START").getTime());
-                shiftEnd.setTimeInMillis(resultSet.getTimestamp("SHIFT_END").getTime());
-                lastBreak.setTimeInMillis(resultSet.getTimestamp("LAST_BREAK").getTime());
-
+                shiftEnd.setTimeInMillis((resultSet.getTimestamp("SHIFT_END")==null ? 0 : resultSet.getTimestamp("SHIFT_END").getTime()));
+                shiftEnd.setTimeInMillis((resultSet.getTimestamp("LAST_BREAK")==null ? 0 : resultSet.getTimestamp("LAST_BREAK").getTime()));
+               
                 result = Shift.loadShift(resultSet.getLong("ID"),
                                          resultSet.getLong("WORKER_ID"),
                                          shiftStart,
@@ -137,17 +139,17 @@ public class ShiftManager implements IDatabaseManager {
                                          resultSet.getLong("TOTAL_BREAK_TIME"));
             }
         } catch (SQLException ex) {
-            //TODO Log exception
+            Logger.getLogger(ShiftManager.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException ex) {
-                    //Log an exception
+                    Logger.getLogger(ShiftManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
-        
+        System.out.println("Vracim shiftu");
         return result;
     }
     @Override

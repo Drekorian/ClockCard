@@ -154,6 +154,7 @@ public class LoginWorkerDialog extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(null, translationResource.getString("LoginWorkerDialog.notFilledFields"), translationResource.getString("LoginWorkerDialog.error"), JOptionPane.ERROR_MESSAGE);
             } else {
                 Worker workerToLogin = WorkerManager.getInstance().findByLogin(login);
+                System.out.println(workerToLogin);
                 if (workerToLogin == null) {
                     JOptionPane.showMessageDialog(null, "User doesn't exist", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {

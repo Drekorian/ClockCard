@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 
@@ -51,7 +53,9 @@ public class WorkerManager implements IDatabaseManager {
      */
     private WorkerManager() {
         testingMode = false;
-        dataSource = getProductionDataSource();
+        //dataSource = getProductionDataSource();
+        dataSource = getTestingDataSource();
+
     }
 
     @Override
@@ -244,8 +248,10 @@ public class WorkerManager implements IDatabaseManager {
                                            resultSet.getString(5),
                                            resultSet.getLong(6),
                                            resultSet.getBoolean(7));
+            }else{
             }
         } catch (SQLException ex) {
+            Logger.getLogger(WorkerManager.class.getName()).log(Level.SEVERE, null, ex);
             //TODO: log.
         } finally {
             if (connection != null) {
@@ -256,7 +262,7 @@ public class WorkerManager implements IDatabaseManager {
                 }
             }
         }
-
+        System.out.println("vraciim"+result);
         return result;
     }
 

@@ -41,7 +41,6 @@ public class Worker implements IDatabaseStoreable {
         if (id < 1) {
             throw new IllegalArgumentException("Worker's ID must be greater than zero.");
         }
-
         return new Worker(id, name, surname, login, password, currentShift, suspended);
     }
     /**
@@ -76,7 +75,6 @@ public class Worker implements IDatabaseStoreable {
         if (password == null || password.equals("")) {
             throw new IllegalArgumentException("Password cannot be null or empty.");
         }
-
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -349,6 +347,7 @@ public class Worker implements IDatabaseStoreable {
         }
 
         currentShift.setEnd(new GregorianCalendar());
+        currentShift.save();
         currentShift = null;
     }
     /**

@@ -4,6 +4,8 @@ import java.sql.*;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a shift worked by a worker.
@@ -22,7 +24,7 @@ public class Shift implements IDatabaseStoreable {
     private Calendar start;
     private Calendar end;
     private Calendar lastBreakStart;
-    private long totalBreakTime;
+    private long totalBreakTime=0;
 
     /**
      * Static constructor used for constructing a Shift that has been previously saved to the database.
@@ -86,7 +88,6 @@ public class Shift implements IDatabaseStoreable {
         PreparedStatement preparedStatement;
         ResultSet resultSet;
         boolean result = false;
-
         try {
             connection = ShiftManager.getInstance().getDataSource().getConnection();
 
@@ -113,7 +114,6 @@ public class Shift implements IDatabaseStoreable {
             }
 
             preparedStatement.setLong(5, totalBreakTime);
-
             result = (preparedStatement.executeUpdate() == 1);
             if (id == null) {
                 boolean generatedKey = false;
@@ -126,15 +126,14 @@ public class Shift implements IDatabaseStoreable {
                 result = result && generatedKey;
             }
         } catch (SQLException ex) {
-            //TODO: log an exception
+            Logger.getLogger(Shift.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 connection.close();
             } catch (SQLException ex) {
-                //TODO: log an exception
+                Logger.getLogger(Shift.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-
         return result;
     }
     @Override

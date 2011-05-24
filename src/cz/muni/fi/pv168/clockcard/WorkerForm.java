@@ -11,11 +11,10 @@
 
 package cz.muni.fi.pv168.clockcard;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
-import javax.swing.JButton;
-import javax.swing.JFrame;
 
 /**
  *
@@ -24,53 +23,99 @@ import javax.swing.JFrame;
 public class WorkerForm extends javax.swing.JFrame {
 
     private Worker logedWorker;
-    private static boolean hasCurrentShift = false;
+    private boolean startedBreak=false;
     /** Creates new form WorkerForm */
     public WorkerForm(Worker worker) {
         logedWorker = worker;
         initComponents();
         //set gui to actual worker
         logedUserLabel.setText(worker.getName()+" "+worker.getSurname());
-        Shift shift = worker.getCurrentShift();
-        if(shift!=null){
-            startShiftButton.setText("End shift");
-            startBreakButton.setEnabled(true);
-            WorkerForm.hasCurrentShift=true;
+        if(logedWorker.getCurrentShift()==null){// nema smenu
+            startShiftButton.setText("zacit novou smenu -l");
+            startBreakButton.setEnabled(false);
+            jMenuItem2.setEnabled(false);
+            jMenuItem3.setEnabled(false);
+            jMenuItem4.setEnabled(false);
+        }else{
+            startShiftButton.setText("Skoncit smenu -l");
+            startBreakButton.setEnabled(false);
+            jMenuItem2.setEnabled(true);
+            jMenuItem3.setEnabled(true);
+            jMenuItem4.setEnabled(false);
         }
     }
 
 
     class logoutAction extends AbstractAction{
         public void actionPerformed(ActionEvent e) {
-           throw new UnsupportedOperationException("Not supported yet.");
+           System.exit(0);
         }
     }
 
     class newShiftAction extends AbstractAction{
         public void actionPerformed(ActionEvent e) {
-            if(WorkerForm.hasCurrentShift){
-                
+            if(logedWorker.getCurrentShift()==null){//zacina smenu
+                try {
+                    logedWorker.startShift();
+                } catch (WorkerException ex) {
+                    Logger.getLogger(WorkerForm.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                    logedWorker.getCurrentShift().save();
+                    logedWorker.save();
+                    startShiftButton.setText("End shift -l");
+                    startBreakButton.setEnabled(true);
+                    jMenuItem1.setEnabled(false);
+                    jMenuItem2.setEnabled(true);
+                    jMenuItem3.setEnabled(true);
+                    jMenuItem4.setEnabled(false);
             }else{
-
+                try {
+                    logedWorker.endShift();
+                } catch (WorkerException ex) {
+                    Logger.getLogger(WorkerForm.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                    logedWorker.save();
+                    startBreakButton.setEnabled(false);
+                    startShiftButton.setText("Start shift-l");
+                    jMenuItem1.setEnabled(true);
+                    jMenuItem2.setEnabled(false);
+                    jMenuItem3.setEnabled(false);
+                    jMenuItem4.setEnabled(false);
             }
-        }
-    }
-
-    class endShiftAction extends AbstractAction{
-        public void actionPerformed(ActionEvent e) {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
     }
 
     class startBreakAction extends AbstractAction{
         public void actionPerformed(ActionEvent e) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-    }
+            if(startedBreak){//ma zapocatou prestavku->konci break
+                try {
+                    logedWorker.endBreak();
+                    logedWorker.getCurrentShift().save();
+                } catch (WorkerException ex) {
+                    Logger.getLogger(WorkerForm.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                    startedBreak=false;
+                    startBreakButton.setText("start break -l");
+                    jMenuItem2.setEnabled(true);
+                    jMenuItem3.setEnabled(true);
+                    jMenuItem4.setEnabled(false);
+                    startShiftButton.setEnabled(true);
 
-    class endBreakAction extends AbstractAction{
-        public void actionPerformed(ActionEvent e) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            }else{
+                try {
+                    logedWorker.startBreak();
+                } catch (WorkerException ex) {
+                    Logger.getLogger(WorkerForm.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                startBreakButton.setText("end break -l");
+                jMenuItem1.setEnabled(false);
+                jMenuItem2.setEnabled(false);
+                jMenuItem3.setEnabled(false);
+                jMenuItem4.setEnabled(true);
+                startShiftButton.setEnabled(false);
+                startedBreak=true;
+            }
+
         }
     }
 
@@ -113,6 +158,7 @@ public class WorkerForm extends javax.swing.JFrame {
         startShiftButton.setAction(new newShiftAction());
         startShiftButton.setText("New Shift");
 
+        startBreakButton.setAction(new startBreakAction());
         startBreakButton.setText("Break");
         startBreakButton.setEnabled(false);
 
@@ -124,17 +170,17 @@ public class WorkerForm extends javax.swing.JFrame {
         jMenuItem1.setText("New Shift");
         jMenu1.add(jMenuItem1);
 
-        jMenuItem2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItem2.setAction(new newShiftAction());
         jMenuItem2.setMnemonic('S');
         jMenuItem2.setText("End Shift");
         jMenu1.add(jMenuItem2);
 
-        jMenuItem3.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_B, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItem3.setAction(new startBreakAction());
         jMenuItem3.setMnemonic('B');
         jMenuItem3.setText("Start Break");
         jMenu1.add(jMenuItem3);
 
-        jMenuItem4.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItem4.setAction(new startBreakAction());
         jMenuItem4.setMnemonic('E');
         jMenuItem4.setText("End Break");
         jMenu1.add(jMenuItem4);

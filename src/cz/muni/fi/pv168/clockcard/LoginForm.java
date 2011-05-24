@@ -22,7 +22,7 @@ public class LoginForm extends javax.swing.JFrame {
     /** Creates new form LoginForm */
     public LoginForm() {
         initComponents();
-        
+        WorkerManager.getInstance().testingOn();        
     }
 
     /** This method is called from within the constructor to
