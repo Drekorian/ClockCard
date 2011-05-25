@@ -326,7 +326,7 @@ public class ShiftManager implements IDatabaseManager {
 
         try {
             connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement(classProperties.getProperty("findBetweenQuery"));
+            preparedStatement = connection.prepareStatement(classProperties.getProperty("findStartBetweenQuery"));
             preparedStatement.setTimestamp(1, begin);
             preparedStatement.setTimestamp(2, end);
 
