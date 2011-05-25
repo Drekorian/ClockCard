@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  *
  * @author David Stein
  * @author Marek Osvald
- * @version 2011.0522
+ * @version 2011.0525
  */
 
 public class Shift implements IDatabaseStoreable {
@@ -20,11 +20,11 @@ public class Shift implements IDatabaseStoreable {
 
     private Properties properties = ShiftManager.getInstance().loadProperties(CLASS_PROPERTY_FILE);
     private Long id;
-    private Long workerID;
+    private long workerID;
     private Calendar start;
     private Calendar end;
     private Calendar lastBreakStart;
-    private long totalBreakTime=0;
+    private long totalBreakTime = 0;
 
     /**
      * Static constructor used for constructing a Shift that has been previously saved to the database.
@@ -78,7 +78,7 @@ public class Shift implements IDatabaseStoreable {
      * Parametric constructor. Creates a shift based on worker's ID and current system date and time.
      * @param workerID unique ID of the worker
      */
-    public Shift(Long workerID) {
+    public Shift(long workerID) {
         this(null, workerID, new GregorianCalendar(), null, null, 0);
     }
 
@@ -86,7 +86,6 @@ public class Shift implements IDatabaseStoreable {
     public boolean save() {
         Connection connection = null;
         PreparedStatement preparedStatement;
-        ResultSet resultSet;
         boolean result = false;
         try {
             connection = ShiftManager.getInstance().getDataSource().getConnection();
@@ -138,6 +137,10 @@ public class Shift implements IDatabaseStoreable {
     }
     @Override
     public boolean destroy() {
+        if (id == null) {
+            return false;
+        }
+
         Connection connection = null;
         PreparedStatement preparedStatement;
         boolean result = false;
@@ -159,7 +162,6 @@ public class Shift implements IDatabaseStoreable {
 
         return result;
     }
-    /* TODO: Review equals() and hashCode() */
     @Override
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass()) {
@@ -167,15 +169,34 @@ public class Shift implements IDatabaseStoreable {
         }
 
         final Shift other = (Shift) obj;
-        if (this.id != other.id) {
-            return false;
+
+        boolean result = true;
+
+        result = result && (workerID == other.workerID);
+
+        if (start != null && other.start != null) {
+            result = result && start.equals(other.start);
         }
 
-        return true;
+        if (end != null && other.end != null) {
+            result = result && end.equals(other.end);
+        }
+
+        if (lastBreakStart != null && other.lastBreakStart != null) {
+            result = result && lastBreakStart.equals(other.lastBreakStart);
+        }
+
+        result = result && (totalBreakTime == other.totalBreakTime);
+
+        return result;
     }
     @Override
     public int hashCode() {
-        return 59 * 7 + (int) (this.id ^ (this.id >>> 32));
+        return (37 * Long.valueOf(workerID).hashCode() +
+                41 * (start != null ? start.hashCode() : 0) +
+                61 * (end != null ? end.hashCode() : 0) +
+                71 * (lastBreakStart != null ? lastBreakStart.hashCode() : 0) +
+                89 * Long.valueOf(totalBreakTime).hashCode());
     }
 
     /**
@@ -183,7 +204,7 @@ public class Shift implements IDatabaseStoreable {
      *
      * @return unique ID of the shift
      */
-    public long getID() {
+    public Long getID() {
         return id;
     }
     /**

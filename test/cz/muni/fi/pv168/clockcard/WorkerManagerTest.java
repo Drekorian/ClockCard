@@ -13,8 +13,10 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
+ * Testing methods for Worker class.
  *
  * @author Marek Osvald
+ * @version 2011.0525
  */
 
 public class WorkerManagerTest {
@@ -34,16 +36,13 @@ public class WorkerManagerTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
     }
-
     @AfterClass
     public static void tearDownClass() throws Exception {
     }
-
     @Before
     public void setUp() {
         WorkerManager.getInstance().testingOn();
     }
-
     @After
     public void tearDown() {
         WorkerManager.getInstance().testingOff();
@@ -53,7 +52,6 @@ public class WorkerManagerTest {
     public void testGetInstance() {
         assertNotNull("Method getInstance() should return an instance.", WorkerManager.getInstance());
     }
-
     @Test
     public void testFind() {
         try {
@@ -75,7 +73,6 @@ public class WorkerManagerTest {
             assertEquals(worker, WorkerManager.getInstance().find(i + 1));
         }
     }
-
     @Test
     public void testGetAll() {
         try {
@@ -83,6 +80,7 @@ public class WorkerManagerTest {
         } catch (SQLException ex) {
             fail("Unable to reset table");
         }
+        
         List<Worker> originalWorkers = new ArrayList<Worker>();
 
         for(int i = 0; i < LOGINS.length; i++) {
@@ -99,11 +97,8 @@ public class WorkerManagerTest {
             originalWorkers.add(worker);
         }
 
-        List<Worker> dbWorkers = new ArrayList<Worker>();
-        dbWorkers.addAll(WorkerManager.getInstance().getAll());
-        assertTrue(dbWorkers.equals(originalWorkers));
+        assertEquals(originalWorkers, WorkerManager.getInstance().getAll());
     }
-
     @Test
     public void testCount() {
         try {
@@ -112,11 +107,8 @@ public class WorkerManagerTest {
             fail("Unable to reset table.");
         }
 
-        long count = 0;
-        count = WorkerManager.getInstance().count();
-        assertEquals("Amount of workers do not match.", LOGINS.length, count);
+        assertEquals("Amount of workers do not match.", LOGINS.length, WorkerManager.getInstance().count());
     }
-
     @Test
     public void testTestingOn() {
         assertTrue("Testing mode should be on", WorkerManager.getInstance().getTestingMode());
@@ -132,7 +124,6 @@ public class WorkerManagerTest {
         assertTrue("Testing mode should be on", WorkerManager.getInstance().getTestingMode());
         assertNotSame("DataSource should have changed from production to testing.", productionDataSource, testingDataSource);
     }
-
     @Test
     public void testTestingOff() {
         assertTrue("Testing mode should be on.", WorkerManager.getInstance().getTestingMode());
@@ -145,13 +136,26 @@ public class WorkerManagerTest {
         assertFalse("Testing mode should be off.", WorkerManager.getInstance().getTestingMode());
         assertSame("DataSource should have stayed the same.", productionDataSource, WorkerManager.getInstance().getDataSource());
     }
-
     @Test
     public void testLoadProperties() {
         Properties databaseProperties = WorkerManager.getInstance().loadProperties(DATABASE_PROPERTY_FILE);
         assertNotNull("Database properties should have been loaded.", databaseProperties);
         Properties classProperties = WorkerManager.getInstance().loadProperties(CLASS_PROPERTY_FILE);
         assertNotNull("Class properties should have been loaded.", classProperties);
+    }
+    @Test
+    public void testFindByLogin() {
+        try {
+            resetTable();
+        } catch (SQLException ex) {
+            fail("Unable to reset table.");
+        }
+
+        for (int i = 0; i < LOGINS.length; i++) {
+            Worker originalWorker = new Worker(NAMES[i], SURNAMES[i], LOGINS[i]);
+            Worker dbWorker = WorkerManager.getInstance().findByLogin(LOGINS[i]);
+            assertEquals(originalWorker, dbWorker);
+        }
     }
 
     public static void resetTable() throws SQLException {
@@ -194,20 +198,5 @@ public class WorkerManagerTest {
             preparedStatement.close();
         }
         connection.close();
-    }
-
-    @Test
-    public void testFindByLogin() {
-        try {
-            resetTable();
-        } catch (SQLException ex) {
-            fail("Unable to reset table.");
-        }
-
-        for (int i = 0; i < LOGINS.length; i++) {
-            Worker originalWorker = new Worker(NAMES[i], SURNAMES[i], LOGINS[i]);
-            Worker dbWorker = WorkerManager.getInstance().findByLogin(LOGINS[i]);
-            assertEquals(originalWorker, dbWorker);
-        }
     }
 }

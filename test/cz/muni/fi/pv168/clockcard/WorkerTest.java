@@ -12,15 +12,17 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- *
+ * Testing methods for Worker class.
+ * 
  * @author Marek Osvald
+ * @version 2011.0525
  */
 
 public class WorkerTest {
     private static final String CLASS_PROPERTY_FILE = "src/Worker.properties";
     private static final Properties PROPERTIES = WorkerManager.getInstance().loadProperties(CLASS_PROPERTY_FILE);
     
-    private Worker joe, bill;
+    private Worker joe;
     private Exception lastThrownException = null;
 
     public WorkerTest() {
@@ -29,29 +31,24 @@ public class WorkerTest {
     @BeforeClass
     public static void setUpClass() {
     }
-
     @AfterClass
     public static void tearDownClass() {
     }
-
     @Before
     public void setUp() {
         WorkerManager.getInstance().testingOn();
 
         joe = new Worker("Joe", "Smith", "joe.smith");
-        bill = new Worker("Bill", "Newman", "bill.newman");
         lastThrownException = null;
     }
-
     @After
     public void tearDown() {
         WorkerManager.getInstance().testingOff();
 
         joe = null;
-        bill = null;
         lastThrownException = null;
     }
-
+    
     @Test
     public void testResetForgottenPassword() {
         String defaultPassword = PROPERTIES.getProperty("defaultPassword");
@@ -70,7 +67,6 @@ public class WorkerTest {
         joe.authenticate(PROPERTIES.getProperty(defaultPassword)));
         assertTrue("Joe's password should be the new specified ", joe.authenticate(newPassword));
     }
-
     @Test
     public void testStartShift() {
         assertFalse("Joe should not be suspended.", joe.isSuspended());
@@ -136,7 +132,6 @@ public class WorkerTest {
         lastThrownException = null;
         assertTrue("First worker's shift should not have changed.", firstShift == firstWorker.getCurrentShift());
     }
-
     @Test
     public void testEndShift() {
         assertNull("Joe should not have a pending shift", joe.getCurrentShift());
@@ -175,6 +170,12 @@ public class WorkerTest {
         assertNotNull("First worker should have a pending shift.", firstShift);
 
         try {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException ex) {
+                fail("Sleeping for a millisecond interrupted.");
+            }
+
             firstWorker.endShift();
             assertNull("Unexpected WorkerException thrown.", lastThrownException);
         } catch (WorkerException ex) {
@@ -183,7 +184,59 @@ public class WorkerTest {
         assertNull("First worker should not have a pending shift.", firstWorker.getCurrentShift());
         assertNotNull("Ended shift should have data and time.", firstShift.getEnd());
     }
+    @Test
+    public void testStartBreak() {
+        assertNull("Joe should be unsaved.", joe.getID());
+        try {
+            joe.startBreak();
+            assertNotNull("WorkerException should have been thrown.", lastThrownException);
+        } catch (WorkerException ex) {
+            lastThrownException = ex;
+        }
+        lastThrownException = null;
 
+        try {
+            WorkerManagerTest.resetTable();
+            ShiftManagerTest.resetTable();
+        } catch (SQLException ex) {
+            fail("Unable to reset table.");
+        }
+
+        Worker firstWorker = WorkerManager.getInstance().find(1);
+        assertFalse("First worker should not be suspended.", firstWorker.isSuspended());
+
+        try {
+            firstWorker.suspend();
+        } catch (WorkerException ex) {
+            fail("First worker should be able to get suspended.");
+        }
+        assertTrue("First worker should be suspended.", firstWorker.isSuspended());
+
+        try {
+            firstWorker.startBreak();
+            assertNotNull("WorkerException should have been thrown.", lastThrownException);
+        } catch (WorkerException ex) {
+            lastThrownException = ex;
+        }
+        lastThrownException = null;
+
+        try {
+            firstWorker.unsuspend();
+            assertNull("Unexpected WorkerException thrown.", lastThrownException);
+        } catch (WorkerException ex) {
+            lastThrownException = ex;
+        }
+        assertFalse("First worker should not be suspended.", firstWorker.isSuspended());
+
+        assertNull("First worker should not have a pending shift.", firstWorker.getCurrentShift());
+        try {
+            firstWorker.startBreak();
+            assertNotNull("WorkerException should have been thrown.", lastThrownException);
+        } catch (WorkerException ex) {
+            lastThrownException = ex;
+        }
+        lastThrownException = null;
+    }
     @Test
     public void testSuspend() {
         assertFalse("Joe should not be suspended.", joe.isSuspended());
@@ -204,7 +257,6 @@ public class WorkerTest {
 
         assertTrue("Joe should be suspended", joe.isSuspended());
     }
-
     @Test
     public void testUnsuspend() {
         assertFalse("Joe should not be suspended.", joe.isSuspended());
@@ -224,7 +276,6 @@ public class WorkerTest {
         }
         assertFalse("Joe should not be suspended.", joe.isSuspended());
     }
-
     @Test
     public void testSave() {
         try {
@@ -241,7 +292,6 @@ public class WorkerTest {
         firstWorker.setPassword("boss");
         assertTrue("Updating of the first worker failed.", firstWorker.save());
     }
-
     @Test
     public void testDestroy() {
         try {
@@ -252,12 +302,12 @@ public class WorkerTest {
 
         assertFalse("Destroy should return false if the worker has not been saved yet.", joe.destroy());
         Worker firstWorker = WorkerManager.getInstance().find(1);
-        assertTrue("Database should be in the default state.", WorkerManager.getInstance().count() == WorkerManagerTest.LOGINS.length);
+        assertTrue("Table should be in the default state.", WorkerManager.getInstance().count() == WorkerManagerTest.LOGINS.length);
         List<Worker> originalWorkers = new ArrayList<Worker>();
         for (int i = 0; i < WorkerManagerTest.LOGINS.length; i++) {
             originalWorkers.add(new Worker(WorkerManagerTest.NAMES[i], WorkerManagerTest.SURNAMES[i], WorkerManagerTest.LOGINS[i]));
         }
-        assertEquals("Database should be in the default state.", originalWorkers, WorkerManager.getInstance().getAll());
+        assertEquals("Table should be in the default state.", originalWorkers, WorkerManager.getInstance().getAll());
         assertTrue("Deleting the first Worker from the database failed.", firstWorker.destroy());
         assertTrue("Database should contain one less record than it's default state.", WorkerManager.getInstance().count() == WorkerManagerTest.LOGINS.length - 1);
         assertNull("First worker should not be in the database.", WorkerManager.getInstance().find(1));
