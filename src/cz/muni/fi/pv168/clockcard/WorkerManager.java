@@ -1,3 +1,4 @@
+
 package cz.muni.fi.pv168.clockcard;
 
 import java.io.FileInputStream;
@@ -48,8 +49,7 @@ public class WorkerManager implements IDatabaseManager {
 
     /**
      * Parameterless constructor. Private in order to force creation
-     * of WorkerManager solely via getInstance()
-     * method.
+     * of WorkerManager solely via getInstance() method.
      */
     private WorkerManager() {
         testingMode = false;
@@ -262,7 +262,6 @@ public class WorkerManager implements IDatabaseManager {
                 }
             }
         }
-        System.out.println("vraciim"+result);
         return result;
     }
 

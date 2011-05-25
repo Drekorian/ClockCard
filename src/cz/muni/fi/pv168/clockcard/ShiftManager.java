@@ -61,28 +61,82 @@ public class ShiftManager implements IDatabaseManager {
     }
 
     @Override
+    public Shift find(long id) {
+        Connection connection = null;
+        PreparedStatement preparedStatement;
+        ResultSet resultSet;
+        Shift result = null;
+
+        try {
+            connection = dataSource.getConnection();
+            preparedStatement = connection.prepareStatement(classProperties.getProperty("findQuery"));
+            preparedStatement.setLong(1, id);
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.getFetchSize() == 1 && resultSet.next()) {
+                Calendar shiftStart = null, shiftEnd = null, lastBreak = null;
+
+                shiftStart = new GregorianCalendar();
+                shiftStart.setTimeInMillis(resultSet.getTimestamp("SHIFT_START").getTime());
+
+                if (resultSet.getTimestamp("SHIFT_END") != null) {
+                    shiftEnd   = new GregorianCalendar();
+                    shiftEnd.setTimeInMillis(resultSet.getTimestamp("SHIFT_END").getTime());
+                }
+                
+                if (resultSet.getTimestamp("LAST_BREAK") != null) {
+                    lastBreak  = new GregorianCalendar();
+                    shiftEnd.setTimeInMillis(resultSet.getTimestamp("LAST_BREAK").getTime());
+                }
+
+                result = Shift.loadShift(resultSet.getLong("ID"),
+                                         resultSet.getLong("WORKER_ID"),
+                                         shiftStart,
+                                         shiftEnd,
+                                         lastBreak,
+                                         resultSet.getLong("TOTAL_BREAK_TIME"));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ShiftManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(ShiftManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return result;
+    }
+    @Override
     public List<? extends IDatabaseStoreable> getAll() {
         Connection connection = null;
         Statement statement;
         ResultSet resultSet;
         ArrayList<Shift> result = null;
-
+        
         try {
             connection = dataSource.getConnection();
             statement = connection.createStatement();
-            resultSet = statement.executeQuery(classProperties.getProperty("getAllQuery"));
+            resultSet = statement.executeQuery(classProperties.getProperty("selectAllQuery"));
             result = new ArrayList<Shift>();
 
             while (resultSet.next()) {
-                Calendar shiftStart, shiftEnd, lastBreak;
+                Calendar shiftStart = null, shiftEnd = null, lastBreak = null;
 
                 shiftStart = new GregorianCalendar();
-                shiftEnd   = new GregorianCalendar();
-                lastBreak  = new GregorianCalendar();
-
                 shiftStart.setTimeInMillis(resultSet.getTimestamp("SHIFT_START").getTime());
-                shiftEnd.setTimeInMillis(resultSet.getTimestamp("SHIFT_END").getTime());
-                lastBreak.setTimeInMillis(resultSet.getTimestamp("LAST_BREAK").getTime());
+
+                if (resultSet.getTimestamp("SHIFT_END") != null) {
+                    shiftEnd   = new GregorianCalendar();
+                    shiftEnd.setTimeInMillis(resultSet.getTimestamp("SHIFT_END").getTime());
+                }
+
+                if (resultSet.getTimestamp("LAST_BREAK") != null) {
+                    lastBreak  = new GregorianCalendar();
+                    lastBreak.setTimeInMillis(resultSet.getTimestamp("LAST_BREAK").getTime());
+                }
 
                 Shift shift = Shift.loadShift(resultSet.getLong("ID"),
                                               resultSet.getLong("WORKER_ID"),
@@ -93,7 +147,8 @@ public class ShiftManager implements IDatabaseManager {
                 result.add(shift);
             }
         } catch (SQLException ex) {
-            Logger.getLogger(ShiftManager.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex);
+            //TODO: log an exception
         } finally {
             try {
                 connection.close();
@@ -109,6 +164,7 @@ public class ShiftManager implements IDatabaseManager {
         return null;
     }
     @Override
+<<<<<<< HEAD
     public Shift find(long id) {
         Connection connection = null;
         PreparedStatement preparedStatement;
@@ -152,6 +208,8 @@ public class ShiftManager implements IDatabaseManager {
         return result;
     }
     @Override
+=======
+>>>>>>> origin/master
     public long count() {
         Connection connection = null;
         Statement statement;
@@ -259,15 +317,20 @@ public class ShiftManager implements IDatabaseManager {
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Calendar shiftStart, shiftEnd, lastBreak;
+                Calendar shiftStart = null, shiftEnd = null, lastBreak = null;
                 
                 shiftStart = new GregorianCalendar();
-                shiftEnd = new GregorianCalendar();
-                lastBreak = new GregorianCalendar();
+                shiftStart.setTimeInMillis(resultSet.getTimestamp("SHIFT_START").getTime());
 
-                shiftStart.setTimeInMillis(resultSet.getTimestamp("shift_start").getTime());
-                shiftEnd.setTimeInMillis(resultSet.getTimestamp("shift_end").getTime());
-                lastBreak.setTimeInMillis(resultSet.getTimestamp("last_break").getTime());
+                if (resultSet.getTimestamp("SHIFT_END") != null) {
+                    shiftEnd = new GregorianCalendar();
+                    shiftEnd.setTimeInMillis(resultSet.getTimestamp("SHIFT_END").getTime());
+                }
+
+                if (resultSet.getTimestamp("LAST_BREAK") != null) {
+                    lastBreak = new GregorianCalendar();
+                    lastBreak.setTimeInMillis(resultSet.getTimestamp("LAST_BREAK").getTime());
+                }
 
                 Shift shift = Shift.loadShift(resultSet.getLong("ID"),
                                               resultSet.getLong("WORKER_ID"),
@@ -290,6 +353,69 @@ public class ShiftManager implements IDatabaseManager {
             return Collections.unmodifiableList(result);
         }
         return null;
+    }
+    /**
+     * Returns a list of shifts that start between given parameters.
+     *
+     * @param begin begin of the interval
+     * @param end end of the interval
+     * @return list of shifts that start between given parameters
+     */
+    public List<Shift> findStartBetween(Timestamp begin, Timestamp end) {
+    Connection connection = null;
+        PreparedStatement preparedStatement;
+        ResultSet resultSet;
+        ArrayList<Shift> result = null;
+
+        try {
+            connection = dataSource.getConnection();
+            preparedStatement = connection.prepareStatement(classProperties.getProperty("findBetweenQuery"));
+            preparedStatement.setTimestamp(1, begin);
+            preparedStatement.setTimestamp(2, end);
+
+            resultSet = preparedStatement.executeQuery();
+            result = new ArrayList<Shift>();
+
+            while (resultSet.next()) {
+                Calendar shiftStart = null, shiftEnd = null, lastBreak = null;
+
+                shiftStart = new GregorianCalendar();
+                shiftStart.setTimeInMillis(resultSet.getTimestamp("SHIFT_START").getTime());
+
+                if (resultSet.getTimestamp("SHIFT_END") != null) {
+                    shiftEnd   = new GregorianCalendar();
+                    shiftEnd.setTimeInMillis(resultSet.getTimestamp("SHIFT_END").getTime());
+                }
+
+                if (resultSet.getTimestamp("LAST_BREAK") != null) {
+                    lastBreak  = new GregorianCalendar();
+                    lastBreak.setTimeInMillis(resultSet.getTimestamp("LAST_BREAK").getTime());
+                }
+
+                Shift shift = Shift.loadShift(resultSet.getLong("ID"),
+                                              resultSet.getLong("WORKER_ID"),
+                                              shiftStart,
+                                              shiftEnd,
+                                              lastBreak,
+                                              resultSet.getLong("TOTAL_BREAK_TIME"));
+                result.add(shift);
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex);
+            //TODO: log an exception
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException ex) {
+                //log an exception
+            }
+        }
+
+        if (result != null) {
+            return Collections.unmodifiableList(result);
+        }
+
+        return new ArrayList<Shift>();
     }
 
     /**
