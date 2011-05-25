@@ -11,10 +11,15 @@
 
 package cz.muni.fi.pv168.clockcard;
 
+import cz.muni.fi.pv168.clockcard.ShiftsForm.ShiftTableModel;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
+import javax.swing.JFrame;
+import javax.swing.JTable;
+import javax.swing.SwingWorker;
 
 /**
  *
@@ -22,7 +27,7 @@ import javax.swing.AbstractAction;
  */
 public class WorkerForm extends javax.swing.JFrame {
 
-    private Worker logedWorker;
+    private static Worker logedWorker;
     private boolean startedBreak=false;
     /** Creates new form WorkerForm */
     public WorkerForm(Worker worker) {
@@ -45,10 +50,20 @@ public class WorkerForm extends javax.swing.JFrame {
         }
     }
 
+    public static Worker getLogedWorker() {
+        return logedWorker;
+    }
+
 
     class logoutAction extends AbstractAction{
         public void actionPerformed(ActionEvent e) {
            System.exit(0);
+        }
+    }
+
+    class showShiftTableAction extends AbstractAction{
+        public void actionPerformed(ActionEvent e) {
+           new showShitTableWorker().execute();
         }
     }
 
@@ -117,6 +132,21 @@ public class WorkerForm extends javax.swing.JFrame {
             }
 
         }
+    }
+
+    class showShitTableWorker extends SwingWorker<Integer, Integer>{
+
+        @Override
+        protected Integer doInBackground() throws Exception {
+            ShiftsForm frm = new ShiftsForm();
+            frm.setVisible(true);
+            JTable table = frm.getjTable1();
+            ShiftTableModel model = (ShiftTableModel)table.getModel();
+            model.addShifts((List<Shift>) ShiftManager.getInstance().findByWorkerID(WorkerForm.getLogedWorker().getID()));
+            model.fireTableDataChanged();
+            return 0;
+        }
+
     }
 
     /** This method is called from within the constructor to
@@ -190,7 +220,7 @@ public class WorkerForm extends javax.swing.JFrame {
         jMenu2.setMnemonic('V');
         jMenu2.setText("View");
 
-        jMenuItem5.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItem5.setAction(new showShiftTableAction());
         jMenuItem5.setMnemonic('A');
         jMenuItem5.setText("View All My Shifts");
         jMenuItem5.setActionCommand("All My Shifts");

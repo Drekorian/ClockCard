@@ -8,8 +8,16 @@
  *
  * Created on 5.5.2011, 17:39:26
  */
-
 package cz.muni.fi.pv168.clockcard;
+
+import cz.muni.fi.pv168.clockcard.IDatabaseStoreable;
+import cz.muni.fi.pv168.clockcard.Shift;
+import java.security.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import javax.swing.JTable;
+import javax.swing.table.AbstractTableModel;
 
 /**
  *
@@ -35,30 +43,12 @@ public class ShiftsForm extends javax.swing.JFrame {
         jTable1 = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Shifts");
 
         jScrollPane1.setName("jScrollPane1"); // NOI18N
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null}
-            },
-            new String [] {
-                "Worker", "Start", "End", "Netto time", "Total break time"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-        });
+        jTable1.setModel(new ShiftTableModel());
         jTable1.setName("jTable1"); // NOI18N
         jScrollPane1.setViewportView(jTable1);
 
@@ -89,21 +79,92 @@ public class ShiftsForm extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-    * @param args the command line arguments
-    */
-    public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new ShiftsForm().setVisible(true);
-            }
-        });
+    public JTable getjTable1() {
+        return jTable1;
     }
 
+    class ShiftTableModel extends AbstractTableModel {
+
+        List<Shift> shifts = new ArrayList<Shift>();
+
+        private ShiftTableModel() {
+            super();
+        }
+
+        public void addShifts(List<Shift> shift) {
+            for(Shift sh: shift){
+                System.out.println(sh.getID());
+                shifts.add(sh);
+            }
+            fireTableStructureChanged();
+            fireTableDataChanged();
+        }
+
+        public int getRowCount() {
+            return shifts.size();
+        }
+
+        @Override
+        public String getColumnName(int columnIndex) {
+            switch (columnIndex) {
+                case 0:
+                    return "Worker";
+                case 1:
+                    return "Start";
+                case 2:
+                    return "End";
+                case 3:
+                    return "NettoTime";
+                case 4:
+                    return "Total break time";
+                default:
+                    throw new IllegalArgumentException("columnIndex");
+            }
+        }
+
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            switch (columnIndex) {
+                case 0:
+                    return String.class;
+                case 1:
+                    return Timestamp.class;
+                case 2:
+                    return Timestamp.class;
+                case 3:
+                    return Long.class;
+                case 4:
+                    return Long.class;
+                default:
+                    throw new IllegalArgumentException("columnIndex");
+            }
+        }
+
+        public int getColumnCount() {
+            return 5;
+        }
+
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            Shift shift = shifts.get(rowIndex);
+            switch (columnIndex) {
+                case 0:
+                    return WorkerForm.getLogedWorker().getSurname();
+                case 1:
+                    return shift.getStart();
+                case 2:
+                    return shift.getEnd();
+                case 3:
+                    return (shift.getEnd().getTimeInMillis() - shift.getStart().getTimeInMillis() - shift.getTotalBreakTime()) / 1000 / 60;
+                case 4:
+                    return shift.getTotalBreakTime() / 1000 / 60;
+                default:
+                    throw new IllegalArgumentException("columnIndex");
+            }
+        }
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
-
 }

@@ -93,7 +93,7 @@ public class ShiftManager implements IDatabaseManager {
                 result.add(shift);
             }
         } catch (SQLException ex) {
-            //TODO: log an exception
+            Logger.getLogger(ShiftManager.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 connection.close();
@@ -149,7 +149,6 @@ public class ShiftManager implements IDatabaseManager {
                 }
             }
         }
-        System.out.println("Vracim shiftu");
         return result;
     }
     @Override
@@ -252,7 +251,6 @@ public class ShiftManager implements IDatabaseManager {
         PreparedStatement statement;
         ResultSet resultSet;
         ArrayList<Shift> result = null;
-
         try {
             connection = dataSource.getConnection();
             result = new ArrayList<Shift>();
@@ -280,19 +278,17 @@ public class ShiftManager implements IDatabaseManager {
                 result.add(shift);
             }
         } catch (SQLException ex) {
-            //TODO: log an exception
+            Logger.getLogger(ShiftManager.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 connection.close();
             } catch (SQLException ex) {
-                //TOOD: log an exception
+                Logger.getLogger(ShiftManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-
         if (result != null) {
             return Collections.unmodifiableList(result);
         }
-
         return null;
     }
 

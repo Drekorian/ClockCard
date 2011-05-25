@@ -38,16 +38,17 @@ public class LoginManagerDialog extends javax.swing.JDialog {
         jPasswordField1 = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Login as Manager");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Translation"); // NOI18N
+        setTitle(bundle.getString("LoginManagerDialog.title")); // NOI18N
         setResizable(false);
 
-        jButton2.setText("Cancel");
+        jButton2.setText(bundle.getString("LoginManagerDialog.jButton2.text")); // NOI18N
         jButton2.setName("jButton2"); // NOI18N
 
-        jLabel2.setText("Password");
+        jLabel2.setText(bundle.getString("LoginManagerDialog.jLabel2.text")); // NOI18N
         jLabel2.setName("jLabel2"); // NOI18N
 
-        jButton1.setText("OK");
+        jButton1.setText(bundle.getString("LoginManagerDialog.jButton1.text")); // NOI18N
         jButton1.setName("jButton1"); // NOI18N
 
         jPasswordField1.setName("jPasswordField1"); // NOI18N
