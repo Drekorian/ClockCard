@@ -1,6 +1,7 @@
 package cz.muni.fi.pv168.clockcard;
 
 import java.sql.*;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
@@ -434,5 +435,41 @@ public class Worker implements IDatabaseStoreable {
         }
         
         return ShiftManager.getInstance().findByWorkerID(id);
-    }   
+    }
+    /**
+     * TODO: Javadoc
+     *
+     * @return
+     */
+    public List<Shift> getLastMonthShifts() {
+        Calendar now = new GregorianCalendar();
+
+        int year = now.get(Calendar.YEAR);
+        int month = now.get(Calendar.MONTH) - 1;
+        int daysInMonth = now.getMaximum(Calendar.DAY_OF_MONTH);
+
+        return getShiftsByMonth(new GregorianCalendar(year, month, 1), new GregorianCalendar(year, month, daysInMonth));
+    }
+    /**
+     * TODO: Javadoc
+     *
+     * @return
+     */
+    public List<Shift> getCurrentMonthShifts() {
+        Calendar now = new GregorianCalendar();
+
+        int year = now.get(Calendar.YEAR);
+        int month = now.get(Calendar.MONTH);
+        int daysInMonth = now.getMaximum(Calendar.DAY_OF_MONTH);
+
+        return getShiftsByMonth(new GregorianCalendar(year, month, 1), new GregorianCalendar(year, month, daysInMonth));
+    }
+
+    /**
+     * Todo: Javadoc
+     * @return
+     */
+    private List<Shift> getShiftsByMonth(Calendar start, Calendar end) {
+        return ShiftManager.getInstance().findStartBetween(new Timestamp(start.getTimeInMillis()), new Timestamp(end.getTimeInMillis()));
+    }
 }
