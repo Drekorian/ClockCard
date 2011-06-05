@@ -53,9 +53,8 @@ public class WorkerManager implements IDatabaseManager {
      */
     private WorkerManager() {
         testingMode = false;
-        //dataSource = getProductionDataSource();
-        dataSource = getTestingDataSource();
-
+        dataSource = getProductionDataSource();
+//        dataSource = getTestingDataSource();
     }
 
     @Override

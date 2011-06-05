@@ -56,8 +56,8 @@ public class ShiftManager implements IDatabaseManager {
      */
     private ShiftManager() {
         testingMode = false;
-        //dataSource = getProductionDataSource();
-          dataSource = getTestingDataSource();
+        dataSource = getProductionDataSource();
+//          dataSource = getTestingDataSource();
     }
 
     @Override
