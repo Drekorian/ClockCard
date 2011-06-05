@@ -13,9 +13,12 @@ package cz.muni.fi.pv168.clockcard;
 import cz.muni.fi.pv168.clockcard.IDatabaseStoreable;
 import cz.muni.fi.pv168.clockcard.Shift;
 import java.security.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
@@ -44,16 +47,18 @@ public class ShiftsForm extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Shifts");
-
-        jScrollPane1.setName("jScrollPane1"); // NOI18N
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Translation"); // NOI18N
+        setTitle(bundle.getString("ShiftsForm.title")); // NOI18N
 
         jTable1.setModel(new ShiftTableModel());
-        jTable1.setName("jTable1"); // NOI18N
         jScrollPane1.setViewportView(jTable1);
 
-        jButton1.setText("Close");
-        jButton1.setName("jButton1"); // NOI18N
+        jButton1.setText(bundle.getString("ShiftsForm.jButton1.text")); // NOI18N
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                hideShiftForm(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -78,6 +83,10 @@ public class ShiftsForm extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void hideShiftForm(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hideShiftForm
+        this.dispose();
+    }//GEN-LAST:event_hideShiftForm
 
     public JTable getjTable1() {
         return jTable1;
@@ -106,17 +115,18 @@ public class ShiftsForm extends javax.swing.JFrame {
 
         @Override
         public String getColumnName(int columnIndex) {
+            ResourceBundle translationResource = ResourceBundle.getBundle("Translation", Locale.getDefault());
             switch (columnIndex) {
                 case 0:
-                    return "Worker";
+                    return translationResource.getString("ShiftFormTable.worker");
                 case 1:
-                    return "Start";
+                    return translationResource.getString("ShiftFormTable.start");
                 case 2:
-                    return "End";
+                    return translationResource.getString("ShiftFormTable.end");
                 case 3:
-                    return "NettoTime";
+                    return translationResource.getString("ShiftFormTable.nettoTime");
                 case 4:
-                    return "Total break time";
+                    return translationResource.getString("ShiftFormTable.totalBreakTime");
                 default:
                     throw new IllegalArgumentException("columnIndex");
             }
@@ -128,13 +138,13 @@ public class ShiftsForm extends javax.swing.JFrame {
                 case 0:
                     return String.class;
                 case 1:
-                    return Timestamp.class;
+                    return String.class;
                 case 2:
-                    return Timestamp.class;
+                    return String.class;
                 case 3:
-                    return Long.class;
+                    return String.class;
                 case 4:
-                    return Long.class;
+                    return String.class;
                 default:
                     throw new IllegalArgumentException("columnIndex");
             }
@@ -150,13 +160,13 @@ public class ShiftsForm extends javax.swing.JFrame {
                 case 0:
                     return WorkerForm.getLogedWorker().getSurname();
                 case 1:
-                    return shift.getStart();
+                    return new SimpleDateFormat("HH:mm:ss dd/MM/yyyy").format(shift.getStart().getTime());
                 case 2:
-                    return shift.getEnd();
+                    return new SimpleDateFormat("HH:mm:ss dd/MM/yyyy").format(shift.getEnd().getTime());
                 case 3:
-                    return (shift.getEnd().getTimeInMillis() - shift.getStart().getTimeInMillis() - shift.getTotalBreakTime()) / 1000 / 60;
+                    return String.valueOf((shift.getEnd().getTimeInMillis() - shift.getStart().getTimeInMillis() - shift.getTotalBreakTime()) / 1000 / 60)+"min";
                 case 4:
-                    return shift.getTotalBreakTime() / 1000 / 60;
+                    return String.valueOf(shift.getTotalBreakTime() / 1000 / 60)+"min";
                 default:
                     throw new IllegalArgumentException("columnIndex");
             }

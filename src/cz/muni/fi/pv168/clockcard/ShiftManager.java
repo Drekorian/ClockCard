@@ -163,53 +163,7 @@ public class ShiftManager implements IDatabaseManager {
 
         return null;
     }
-    @Override
-<<<<<<< HEAD
-    public Shift find(long id) {
-        Connection connection = null;
-        PreparedStatement preparedStatement;
-        ResultSet resultSet;
-        Shift result = null;
-
-        try {
-            connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement(classProperties.getProperty("findQuery"));
-            preparedStatement.setLong(1, id);
-            resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.getFetchSize() == 1 && resultSet.next()) {
-                Calendar shiftStart, shiftEnd, lastBreak;
-
-                shiftStart = new GregorianCalendar();
-                shiftEnd   = new GregorianCalendar();
-                lastBreak  = new GregorianCalendar();
-                shiftStart.setTimeInMillis(resultSet.getTimestamp("SHIFT_START").getTime());
-                shiftEnd.setTimeInMillis((resultSet.getTimestamp("SHIFT_END")==null ? 0 : resultSet.getTimestamp("SHIFT_END").getTime()));
-                shiftEnd.setTimeInMillis((resultSet.getTimestamp("LAST_BREAK")==null ? 0 : resultSet.getTimestamp("LAST_BREAK").getTime()));
-               
-                result = Shift.loadShift(resultSet.getLong("ID"),
-                                         resultSet.getLong("WORKER_ID"),
-                                         shiftStart,
-                                         shiftEnd,
-                                         lastBreak,
-                                         resultSet.getLong("TOTAL_BREAK_TIME"));
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(ShiftManager.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(ShiftManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-        return result;
-    }
-    @Override
-=======
->>>>>>> origin/master
+  
     public long count() {
         Connection connection = null;
         Statement statement;
