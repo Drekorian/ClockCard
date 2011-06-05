@@ -1,8 +1,10 @@
 package cz.muni.fi.pv168.clockcard;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +20,7 @@ import java.util.logging.Logger;
 public class Shift implements IDatabaseStoreable {
     private static final String CLASS_PROPERTY_FILE = "src/Shift.properties";
     private static final Properties CLASS_PROPERTIES = ShiftManager.getInstance().loadProperties(CLASS_PROPERTY_FILE);
+    private static final Logger LOGGER = Logger.getLogger(Shift.class.getName());
 
     private Long id;
     private long workerID;
@@ -85,54 +88,52 @@ public class Shift implements IDatabaseStoreable {
     @Override
     public boolean save() {
         Connection connection = null;
-        PreparedStatement preparedStatement;
+        List<QueryParameter> params = null;
+        Long key = null;
+        int updatedRows = 0;
         boolean result = false;
-        try {
-            connection = ShiftManager.getInstance().getDataSource().getConnection();
 
-            if (id == null) {
-                preparedStatement = connection.prepareStatement(CLASS_PROPERTIES.getProperty("saveQuery"), Statement.RETURN_GENERATED_KEYS);
+        if ((connection = ShiftManager.getInstance().openConnection()) == null) {
+            return false;
+        }
+
+        params = new ArrayList<QueryParameter>();
+        params.add(new QueryParameter(QueryParameter.LONG, workerID));
+        params.add(new QueryParameter(QueryParameter.TIMESTAMP, new Timestamp(start.getTimeInMillis())));
+        if (end != null) {
+            params.add(new QueryParameter(QueryParameter.TIMESTAMP, new Timestamp(end.getTimeInMillis())));
+        } else {
+            params.add(new QueryParameter(QueryParameter.TIMESTAMP, null));
+        }
+
+        if (lastBreakStart != null) {
+            params.add(new QueryParameter(QueryParameter.TIMESTAMP, new Timestamp(lastBreakStart.getTimeInMillis())));
+        } else {
+            params.add(new QueryParameter(QueryParameter.TIMESTAMP, null));
+        }
+
+        params.add(new QueryParameter(QueryParameter.LONG, totalBreakTime));
+
+        if (id == null) {
+            key = new Long(0);
+            updatedRows = ShiftManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("saveQuery"), params, key);
+        } else {
+            params.add(new QueryParameter(QueryParameter.LONG, id));
+            updatedRows = ShiftManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("updateQuery"), params);
+        }
+
+        result = (updatedRows == 1);
+
+        if (id == null) {
+            if (key != null && key.longValue() <= 0) {
+                id = key;
             } else {
-                preparedStatement = connection.prepareStatement(CLASS_PROPERTIES.getProperty("updateQuery"));
-                preparedStatement.setLong(6, id);
-            }
-
-            preparedStatement.setLong(1, workerID);
-            preparedStatement.setTimestamp(2, new Timestamp(start.getTimeInMillis()));
-
-            if (end != null) {
-                preparedStatement.setTimestamp(3, new Timestamp(end.getTimeInMillis()));
-            } else {
-                preparedStatement.setNull(3, Types.TIMESTAMP);
-            }
-            
-            if (lastBreakStart != null) {
-                preparedStatement.setTimestamp(4, new Timestamp(lastBreakStart.getTimeInMillis()));
-            } else {
-                preparedStatement.setNull(4, Types.TIMESTAMP);
-            }
-
-            preparedStatement.setLong(5, totalBreakTime);
-            result = (preparedStatement.executeUpdate() == 1);
-            if (id == null) {
-                boolean generatedKey = false;
-                ResultSet keys = preparedStatement.getGeneratedKeys();
-                if (keys.next()){
-                    id = keys.getLong(1);
-                    generatedKey = true;
-                }
-                
-                result = result && generatedKey;
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(Shift.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException ex) {
-                Logger.getLogger(Shift.class.getName()).log(Level.SEVERE, null, ex);
+                result = false;
             }
         }
+
+        ShiftManager.getInstance().terminateConnection(connection);
+
         return result;
     }
     @Override
@@ -142,23 +143,20 @@ public class Shift implements IDatabaseStoreable {
         }
 
         Connection connection = null;
-        PreparedStatement preparedStatement;
+        List<QueryParameter> params;
+        int updatedRows = 0;
         boolean result = false;
 
-        try {
-            connection = ShiftManager.getInstance().getDataSource().getConnection();
-            preparedStatement = connection.prepareStatement(CLASS_PROPERTIES.getProperty("deleteQuery"));
-            preparedStatement.setLong(1, id);
-            result = (preparedStatement.executeUpdate() == 1);
-        } catch (SQLException ex) {
-            //log an exception
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException ex) {
-                //TODO: log an exception
-            }
+        if ((connection = ShiftManager.getInstance().openConnection()) == null) {
+            return false;
         }
+
+        params = new ArrayList<QueryParameter>();
+        params.add(new QueryParameter(QueryParameter.LONG, id));
+        updatedRows = ShiftManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("deleteQuery"), params);
+        result = (updatedRows == 1);
+        
+        ShiftManager.getInstance().terminateConnection(connection);
 
         return result;
     }

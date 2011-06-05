@@ -42,6 +42,7 @@ public class WorkerManager extends ADatabaseManager {
      * of WorkerManager solely via getInstance() method.
      */
     private WorkerManager() {
+        LOGGER.finest(CLASS_PROPERTIES.getProperty("log.newInstance"));
     }
 
     @Override
@@ -70,7 +71,7 @@ public class WorkerManager extends ADatabaseManager {
                                            resultSet.getBoolean("SUSPENDED"));
                 }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.queryProcessingFailed"), ex);
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.findQueryProcessingFailed"), ex);
         } finally {
             terminateConnection(connection);
         }
@@ -102,7 +103,7 @@ public class WorkerManager extends ADatabaseManager {
                 result.add(worker);
             }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.queryProcessingFailed"), ex);
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.getAllQueryProcessingFailed"), ex);
         } finally {
             terminateConnection(connection);
         }
@@ -131,7 +132,7 @@ public class WorkerManager extends ADatabaseManager {
             }
         } catch (SQLException ex) {
             result = -1;
-            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.queryProcessingFailed"), ex);
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.countQueryProcessingFailed"), ex);
         } finally {
             terminateConnection(connection);
         }
@@ -173,7 +174,7 @@ public class WorkerManager extends ADatabaseManager {
                                            resultSet.getBoolean(7));
             }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.queryProcessingFailed"), ex);
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.findByLoginQueryProcessingFailed"), ex);
         } finally {
             terminateConnection(connection);
         }

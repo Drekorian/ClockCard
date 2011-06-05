@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 public class Worker implements IDatabaseStoreable {
     private static final String CLASS_PROPERTY_FILE = "src/Worker.properties";
     private static final Properties CLASS_PROPERTIES = WorkerManager.getInstance().loadProperties(CLASS_PROPERTY_FILE);
+    private static final Logger LOGGER = Logger.getLogger(Worker.class.getName());
     
     private Long id;
     private String name;
@@ -44,6 +45,8 @@ public class Worker implements IDatabaseStoreable {
         if (id < 1) {
             throw new IllegalArgumentException("Worker's ID must be greater than zero.");
         }
+
+        LOGGER.log(Level.FINEST, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.loadWorker"), name, surname });
         return new Worker(id, name, surname, login, password, currentShift, suspended);
     }
     /**
@@ -53,8 +56,8 @@ public class Worker implements IDatabaseStoreable {
      */
     public static void resetForgottenPassword(Worker worker) {
         worker.password = CLASS_PROPERTIES.getProperty("defaultPassword");
+        LOGGER.log(Level.INFO, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.resetPassword"), worker.getName(), worker.getShifts() });
     }
-
     /**
      * Parametric constructor. Private in order to prevent misuse.
      *
@@ -78,6 +81,7 @@ public class Worker implements IDatabaseStoreable {
         if (password == null || password.equals("")) {
             throw new IllegalArgumentException("Password cannot be null or empty.");
         }
+        
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -96,6 +100,7 @@ public class Worker implements IDatabaseStoreable {
      */
     public Worker(String name, String surname, String login) {
         this(null, name, surname, login, CLASS_PROPERTIES.getProperty("defaultPassword"), null, false);
+        LOGGER.log(Level.FINEST, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.newWorker"), name, surname });
     }
 
     @Override
@@ -133,11 +138,21 @@ public class Worker implements IDatabaseStoreable {
         result = (updatedRows == 1);
 
         if (id == null) {
-            id = key;
-            result = result && key != null;
+            if (key != null && key.longValue() <= 0) {
+                id = key;
+            } else {
+                result = false;
+                LOGGER.log(Level.WARNING, CLASS_PROPERTIES.getProperty("log.keyGenerationFailed"));
+            }
         }
         
         WorkerManager.getInstance().terminateConnection(connection);    
+
+        if (result) {
+            LOGGER.log(Level.FINEST, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.save"), name, surname });
+        } else {
+            LOGGER.log(Level.WARNING, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.saveFailed"), name, surname });
+        }
 
         return result;
     }
@@ -159,6 +174,12 @@ public class Worker implements IDatabaseStoreable {
         params.add(new QueryParameter(QueryParameter.LONG, id));
         result = (WorkerManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("deleteQuery"), params) == 1);
         WorkerManager.getInstance().terminateConnection(connection);
+
+        if (result) {
+            LOGGER.log(Level.FINEST, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.destroy"), name, surname });
+        } else {
+            LOGGER.log(Level.WARNING, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.destroyFailed"), name, surname });
+        }
 
         return result;
     }
