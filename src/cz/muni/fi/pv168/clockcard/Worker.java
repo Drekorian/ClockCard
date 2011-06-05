@@ -1,22 +1,24 @@
 package cz.muni.fi.pv168.clockcard;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class that represents worker who is using the ClockCard system.
  *
  * @author Marek Osvald
- * @version 2011.0522
+ * @version 2011.0604
  */
 
 public class Worker implements IDatabaseStoreable {
     private static final String CLASS_PROPERTY_FILE = "src/Worker.properties";
-
-    private static final Properties classProperties = WorkerManager.getInstance().loadProperties(CLASS_PROPERTY_FILE);
+    private static final Properties CLASS_PROPERTIES = WorkerManager.getInstance().loadProperties(CLASS_PROPERTY_FILE);
     
     private Long id;
     private String name;
@@ -50,7 +52,7 @@ public class Worker implements IDatabaseStoreable {
      * @param worker worker whose password is being reset
      */
     public static void resetForgottenPassword(Worker worker) {
-        worker.password = classProperties.getProperty("defaultPassword");
+        worker.password = CLASS_PROPERTIES.getProperty("defaultPassword");
     }
 
     /**
@@ -93,59 +95,50 @@ public class Worker implements IDatabaseStoreable {
      * @param login worker's login
      */
     public Worker(String name, String surname, String login) {
-        this(null, name, surname, login, classProperties.getProperty("defaultPassword"), null, false);
+        this(null, name, surname, login, CLASS_PROPERTIES.getProperty("defaultPassword"), null, false);
     }
 
     @Override
     public boolean save() {
         Connection connection = null;
-        PreparedStatement preparedStatement;
+        List<QueryParameter> params;
+        Long key = null;
+        int updatedRows = 0;
         boolean result = false;
 
-        try {
-            connection = WorkerManager.getInstance().getDataSource().getConnection();
-
-            if (id == null) {
-                preparedStatement = connection.prepareStatement(classProperties.getProperty("saveQuery"), Statement.RETURN_GENERATED_KEYS);
-            } else {
-                preparedStatement = connection.prepareStatement(classProperties.getProperty("updateQuery"));
-                preparedStatement.setLong(7, id);
-            }
-
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, surname);
-            preparedStatement.setString(3, login);
-            preparedStatement.setString(4, password);
-            if (currentShift != null) {
-                preparedStatement.setLong(5, currentShift.getID());
-            } else {
-                preparedStatement.setNull(5, Types.INTEGER);
-            }
-            preparedStatement.setBoolean(6, suspended);
-
-            result = (preparedStatement.executeUpdate() == 1);
-
-            if (id == null) {
-                boolean generatedKey = false;
-                ResultSet keys = preparedStatement.getGeneratedKeys();
-                if (keys.next()){
-                    id = keys.getLong(1);
-                    generatedKey = true;
-                }
-
-                result = result && generatedKey;
-            }
-        } catch (SQLException ex) {
-            //TODO: log error
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                    //Log error
-                }
-            }
+        if ((connection = WorkerManager.getInstance().openConnection()) == null) {
+            return false;
         }
+
+        params = new ArrayList<QueryParameter>();
+        params.add(new QueryParameter(QueryParameter.STRING, name));
+        params.add(new QueryParameter(QueryParameter.STRING, surname));
+        params.add(new QueryParameter(QueryParameter.STRING, login));
+        params.add(new QueryParameter(QueryParameter.STRING, password));
+        if (currentShift != null) {
+            params.add(new QueryParameter(QueryParameter.LONG, currentShift.getID()));
+        } else {
+            params.add(new QueryParameter(QueryParameter.LONG, null));
+        }
+        params.add(new QueryParameter(QueryParameter.BOOLEAN, suspended));
+
+        if (id == null) {
+            key = new Long(0);
+            updatedRows = WorkerManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("saveQuery"), params, key);
+        } else {
+            params.add(new QueryParameter(QueryParameter.LONG, id));
+            updatedRows = WorkerManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("updateQuery"), params);
+        }
+
+        result = (updatedRows == 1);
+
+        if (id == null) {
+            id = key;
+            result = result && key != null;
+        }
+        
+        WorkerManager.getInstance().terminateConnection(connection);    
+
         return result;
     }
     @Override
@@ -155,25 +148,17 @@ public class Worker implements IDatabaseStoreable {
         }
 
         Connection connection = null;
-        PreparedStatement preparedStatement;
+        List<QueryParameter> params;
         boolean result = false;
 
-        try {
-            connection = WorkerManager.getInstance().getDataSource().getConnection();
-            preparedStatement = connection.prepareStatement(classProperties.getProperty("deleteQuery"));
-            preparedStatement.setLong(1, id);
-            result = (preparedStatement.executeUpdate() == 1);
-        } catch (SQLException ex) {
-            //TODO: log
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                    //log exception
-                }
-            }
+        if ((connection = WorkerManager.getInstance().openConnection()) == null) {
+            return false;
         }
+
+        params = new ArrayList<QueryParameter>();
+        params.add(new QueryParameter(QueryParameter.LONG, id));
+        result = (WorkerManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("deleteQuery"), params) == 1);
+        WorkerManager.getInstance().terminateConnection(connection);
 
         return result;
     }

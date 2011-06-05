@@ -1,7 +1,5 @@
 package cz.muni.fi.pv168.clockcard;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,29 +9,21 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.sql.DataSource;
-import org.apache.commons.dbcp.BasicDataSource;
 
 /**
  * Database backend manager for handling Shift class.
  *
  * @author David Stein
  * @author Marek Osvald
- * @version 2011.0522
+ * @version 2011.0604
  */
 
-/* TODO: Consider refactoring with usage of inheritance. */
-
-public class ShiftManager implements IDatabaseManager {
-    private static final String DATABASE_PROPERTY_FILE = "src/Database.properties";
+public class ShiftManager extends ADatabaseManager {
     private static final String CLASS_PROPERTY_FILE = "src/Shift.properties";
 
     private static ShiftManager instance;
 
-    private final Properties databaseProperties = loadProperties(DATABASE_PROPERTY_FILE);
     private final Properties classProperties = loadProperties(CLASS_PROPERTY_FILE);
-    private boolean testingMode;
-    private DataSource dataSource;
 
     /**
      * Returns the sole instance of ShiftManager in the program. Provided that
@@ -55,9 +45,6 @@ public class ShiftManager implements IDatabaseManager {
      * method.
      */
     private ShiftManager() {
-        testingMode = false;
-        //dataSource = getProductionDataSource();
-          dataSource = getTestingDataSource();
     }
 
     @Override
@@ -68,7 +55,7 @@ public class ShiftManager implements IDatabaseManager {
         Shift result = null;
 
         try {
-            connection = dataSource.getConnection();
+            connection = getDataSource().getConnection();
             preparedStatement = connection.prepareStatement(classProperties.getProperty("findQuery"));
             preparedStatement.setLong(1, id);
             resultSet = preparedStatement.executeQuery();
@@ -110,14 +97,14 @@ public class ShiftManager implements IDatabaseManager {
         return result;
     }
     @Override
-    public List<? extends IDatabaseStoreable> getAll() {
+    public List<Shift> getAll() {
         Connection connection = null;
         Statement statement;
         ResultSet resultSet;
         ArrayList<Shift> result = null;
         
         try {
-            connection = dataSource.getConnection();
+            connection = getDataSource().getConnection();
             statement = connection.createStatement();
             resultSet = statement.executeQuery(classProperties.getProperty("selectAllQuery"));
             result = new ArrayList<Shift>();
@@ -171,7 +158,7 @@ public class ShiftManager implements IDatabaseManager {
         long result = 0;
 
         try {
-            connection = dataSource.getConnection();
+            connection = getDataSource().getConnection();
             statement = connection.createStatement();
             resultSet = statement.executeQuery(classProperties.getProperty("countQuery"));
             if (resultSet.next()) {
@@ -191,59 +178,6 @@ public class ShiftManager implements IDatabaseManager {
         }
         
         return result;
-    }
-    @Override
-    public boolean getTestingMode() {
-        return testingMode;
-    }
-    @Override
-    public void testingOn() {
-        if (!testingMode) {
-            dataSource = getTestingDataSource();
-            testingMode = true;
-        }
-    }
-    @Override
-    public void testingOff() {
-        if (testingMode) {
-            dataSource = getProductionDataSource();
-            testingMode = false;
-        }
-    }
-    @Override
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-    @Override
-    public Properties loadProperties(String fileName) {
-        if (fileName == null) {
-            throw new IllegalArgumentException("fileName cannot be null.");
-        }
-
-        FileInputStream inputStream = null;
-        Properties _properties = null;
-
-        try {
-            inputStream = new FileInputStream(fileName);
-            _properties = new Properties();
-            _properties.load(inputStream);
-        } catch (IOException e) {
-            //TODO: LOG fatal error, Property file not found.
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException ex) {
-                    //TODO: Log error
-                }
-            }
-        }
-
-        if (_properties != null) {
-            return _properties;
-        }
-
-        return new Properties();
     }
 
     /**
@@ -265,7 +199,7 @@ public class ShiftManager implements IDatabaseManager {
         ArrayList<Shift> result = null;
 
         try {
-            connection = dataSource.getConnection();
+            connection = getDataSource().getConnection();
             result = new ArrayList<Shift>();
             statement = connection.prepareStatement(classProperties.getProperty("findByWorkerIDQuery"));
             statement.setLong(1, workerid);
@@ -311,7 +245,14 @@ public class ShiftManager implements IDatabaseManager {
 
         return null;
     }
-
+    /**
+     * TOOD: JAVADOC
+     *
+     * @param begin
+     * @param end
+     * @param workerID
+     * @return
+     */
     public List<Shift> findStartBetween(Timestamp begin, Timestamp end, Long workerID) {
         Connection connection = null;
         PreparedStatement preparedStatement;
@@ -319,7 +260,7 @@ public class ShiftManager implements IDatabaseManager {
         ArrayList<Shift> result = null;
 
         try {
-            connection = dataSource.getConnection();
+            connection = getDataSource().getConnection();
             if (workerID == null) {
                 preparedStatement = connection.prepareStatement(classProperties.getProperty("findStartBetweenQuery"));
             } else {
@@ -377,7 +318,6 @@ public class ShiftManager implements IDatabaseManager {
 
         return new ArrayList<Shift>();
     }
-
     /**
      * Returns a list of shifts that start between given parameters.
      *
@@ -387,32 +327,5 @@ public class ShiftManager implements IDatabaseManager {
      */
     public List<Shift> findStartBetween(Timestamp begin, Timestamp end) {
         return findStartBetween(begin, end, null);
-    }
-
-    /**
-     * Returns new DataSource representing a connection to the testing database.
-     * 
-     * @return new DataSource representing a connection to the testing database
-     */
-    private DataSource getTestingDataSource() {
-        BasicDataSource testingDataSource = new BasicDataSource();
-        testingDataSource.setDriverClassName(databaseProperties.getProperty("driverName"));
-        testingDataSource.setUrl(databaseProperties.getProperty("testDatabase"));
-        testingDataSource.setUsername(databaseProperties.getProperty("testLogin"));
-        testingDataSource.setPassword(databaseProperties.getProperty("testPassword"));
-        return testingDataSource;
-    }
-    /**
-     * Returns new DataSource representing a connection to the production database.
-     *
-     * @return new DataSource representing a connection to the production database
-     */
-    private DataSource getProductionDataSource() {
-        BasicDataSource productionDataSource = new BasicDataSource();
-        productionDataSource.setDriverClassName(databaseProperties.getProperty("driverName"));
-        productionDataSource.setUrl(databaseProperties.getProperty("productionDatabase"));
-        productionDataSource.setUsername(databaseProperties.getProperty("productionLogin"));
-        productionDataSource.setPassword(databaseProperties.getProperty("productionPassword"));
-        return productionDataSource;
     }
 }

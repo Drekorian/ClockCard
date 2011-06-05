@@ -12,13 +12,13 @@ import java.util.logging.Logger;
  *
  * @author David Stein
  * @author Marek Osvald
- * @version 2011.0525
+ * @version 2011.0604
  */
 
 public class Shift implements IDatabaseStoreable {
-    private final static String CLASS_PROPERTY_FILE = "src/Shift.properties";
+    private static final String CLASS_PROPERTY_FILE = "src/Shift.properties";
+    private static final Properties CLASS_PROPERTIES = ShiftManager.getInstance().loadProperties(CLASS_PROPERTY_FILE);
 
-    private Properties properties = ShiftManager.getInstance().loadProperties(CLASS_PROPERTY_FILE);
     private Long id;
     private long workerID;
     private Calendar start;
@@ -91,9 +91,9 @@ public class Shift implements IDatabaseStoreable {
             connection = ShiftManager.getInstance().getDataSource().getConnection();
 
             if (id == null) {
-                preparedStatement = connection.prepareStatement(properties.getProperty("saveQuery"), Statement.RETURN_GENERATED_KEYS);
+                preparedStatement = connection.prepareStatement(CLASS_PROPERTIES.getProperty("saveQuery"), Statement.RETURN_GENERATED_KEYS);
             } else {
-                preparedStatement = connection.prepareStatement(properties.getProperty("updateQuery"));
+                preparedStatement = connection.prepareStatement(CLASS_PROPERTIES.getProperty("updateQuery"));
                 preparedStatement.setLong(6, id);
             }
 
@@ -147,7 +147,7 @@ public class Shift implements IDatabaseStoreable {
 
         try {
             connection = ShiftManager.getInstance().getDataSource().getConnection();
-            preparedStatement = connection.prepareStatement(properties.getProperty("deleteQuery"));
+            preparedStatement = connection.prepareStatement(CLASS_PROPERTIES.getProperty("deleteQuery"));
             preparedStatement.setLong(1, id);
             result = (preparedStatement.executeUpdate() == 1);
         } catch (SQLException ex) {

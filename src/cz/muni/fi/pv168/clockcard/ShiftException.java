@@ -5,7 +5,7 @@ package cz.muni.fi.pv168.clockcard;
  *
  * @author David Stein
  * @author Marek Osvald
- * @version 2011.0522
+ * @version 2011.0604
  */
 
 public class ShiftException extends Exception{
