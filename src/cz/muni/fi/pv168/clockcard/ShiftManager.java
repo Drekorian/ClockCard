@@ -41,12 +41,9 @@ public class ShiftManager extends ADatabaseManager {
 
     /**
      * Parameterless constructor. Private in order to force creating
-     * of ShiftManager solely via getInstance().
-     * method.
+     * of ShiftManager solely via getInstance() method.
      */
     private ShiftManager() {
-        testingMode = false;
-        dataSource = getProductionDataSource();
     }
 
     @Override

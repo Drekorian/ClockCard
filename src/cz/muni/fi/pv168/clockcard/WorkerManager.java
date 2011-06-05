@@ -42,8 +42,6 @@ public class WorkerManager extends ADatabaseManager {
      * of WorkerManager solely via getInstance() method.
      */
     private WorkerManager() {
-        testingMode = false
-	dataSource = getProductionDataSource();
     }
 
     @Override
