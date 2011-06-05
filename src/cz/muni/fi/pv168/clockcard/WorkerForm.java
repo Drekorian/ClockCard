@@ -71,13 +71,19 @@ public class WorkerForm extends javax.swing.JFrame {
 
     class showShiftTableAction extends AbstractAction{
         public void actionPerformed(ActionEvent e) {
-           new showShitTableWorker().execute();
+           new showShiftTableWorker().execute();
         }
     }
 
     class showShiftTableCurrentMonthAction extends AbstractAction{
         public void actionPerformed(ActionEvent e) {
-           new showShitTableWorkerCurrentMonth().execute();
+           new showShiftTableWorkerCurrentMonth().execute();
+        }
+    }
+
+    class showShiftTableLastMonthAction extends AbstractAction{
+        public void actionPerformed(ActionEvent e) {
+           new showShiftTableWorkerLastMonth().execute();
         }
     }
 
@@ -150,7 +156,7 @@ public class WorkerForm extends javax.swing.JFrame {
         }
     }
 
-    class showShitTableWorker extends SwingWorker<Integer, Integer>{
+    class showShiftTableWorker extends SwingWorker<Integer, Integer>{
         @Override
         protected Integer doInBackground() throws Exception {
             ShiftsForm frm = new ShiftsForm();
@@ -164,7 +170,7 @@ public class WorkerForm extends javax.swing.JFrame {
         }
     }
 
-    class showShitTableWorkerCurrentMonth extends SwingWorker<Integer, Integer>{
+    class showShiftTableWorkerCurrentMonth extends SwingWorker<Integer, Integer>{
         @Override
         protected Integer doInBackground() throws Exception {
             ShiftsForm frm = new ShiftsForm();
@@ -176,7 +182,34 @@ public class WorkerForm extends javax.swing.JFrame {
             int firstDay = now.getActualMinimum(GregorianCalendar.DATE);
             int month = now.get(GregorianCalendar.MONTH);
             int year = now.get(GregorianCalendar.YEAR);
-            List<Shift> shifts = (List<Shift>) ShiftManager.getInstance().findStartBetween(new Timestamp(new GregorianCalendar(year, month, firstDay).getTimeInMillis()),new Timestamp(new GregorianCalendar(year, month, lastDay).getTimeInMillis()));
+            Timestamp startTime = new Timestamp(new GregorianCalendar(year, month, firstDay).getTimeInMillis());
+            Timestamp endTime = new Timestamp(new GregorianCalendar(year, month, lastDay).getTimeInMillis());
+            System.out.println(startTime.getTime());
+            System.out.println(endTime.getTime());
+            List<Shift> shifts = (List<Shift>) ShiftManager.getInstance().findStartBetween(startTime,endTime,WorkerForm.getLogedWorker().getID());
+            model.addShifts(shifts);
+            model.fireTableDataChanged();
+            return 0;
+        }
+    }
+    class showShiftTableWorkerLastMonth extends SwingWorker<Integer, Integer>{
+        @Override
+        protected Integer doInBackground() throws Exception {
+            ShiftsForm frm = new ShiftsForm();
+            frm.setVisible(true);
+            JTable table = frm.getjTable1();
+            ShiftTableModel model = (ShiftTableModel)table.getModel();
+            GregorianCalendar now = new GregorianCalendar();
+            GregorianCalendar lastMonth = new GregorianCalendar(now.get(GregorianCalendar.YEAR), now.get(GregorianCalendar.MONTH)-1, now.get(GregorianCalendar.DAY_OF_MONTH));
+            int lastDay = lastMonth.getActualMaximum(GregorianCalendar.DATE);
+            int firstDay = lastMonth.getActualMinimum(GregorianCalendar.DATE);
+            int month = lastMonth.get(GregorianCalendar.MONTH);
+            int year = lastMonth.get(GregorianCalendar.YEAR);
+            Timestamp startTime = new Timestamp(new GregorianCalendar(year, month, firstDay).getTimeInMillis());
+            Timestamp endTime = new Timestamp(new GregorianCalendar(year, month, lastDay).getTimeInMillis());
+            System.out.println(startTime.getTime());
+            System.out.println(endTime.getTime());
+            List<Shift> shifts = (List<Shift>) ShiftManager.getInstance().findStartBetween(startTime,endTime,WorkerForm.getLogedWorker().getID());
             model.addShifts(shifts);
             model.fireTableDataChanged();
             return 0;
@@ -218,6 +251,7 @@ public class WorkerForm extends javax.swing.JFrame {
 
         logedUserLabel.setText(bundle.getString("WorkerForm.logedUserLabel.text")); // NOI18N
 
+        endShiftButton.setAction(new logoutAction());
         endShiftButton.setText(bundle.getString("WorkerForm.endShiftButton.text")); // NOI18N
 
         startShiftButton.setAction(new newShiftAction());
@@ -266,6 +300,7 @@ public class WorkerForm extends javax.swing.JFrame {
         jMenuItem6.setText(bundle.getString("WorkerForm.jMenuItem6.text")); // NOI18N
         jMenu2.add(jMenuItem6);
 
+        jMenuItem7.setAction(new showShiftTableLastMonthAction());
         jMenuItem7.setMnemonic('L');
         jMenuItem7.setText(bundle.getString("WorkerForm.jMenuItem7.text")); // NOI18N
         jMenu2.add(jMenuItem7);
