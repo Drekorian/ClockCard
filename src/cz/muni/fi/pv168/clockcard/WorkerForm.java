@@ -11,10 +11,19 @@
 
 package cz.muni.fi.pv168.clockcard;
 
+import cz.muni.fi.pv168.clockcard.ShiftsForm.ShiftTableModel;
 import java.awt.event.ActionEvent;
+import java.sql.Timestamp;
+import java.util.Enumeration;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
+import javax.swing.JTable;
+import javax.swing.SwingWorker;
 
 /**
  *
@@ -22,27 +31,35 @@ import javax.swing.AbstractAction;
  */
 public class WorkerForm extends javax.swing.JFrame {
 
-    private Worker logedWorker;
+    private static Worker logedWorker;
     private boolean startedBreak=false;
     /** Creates new form WorkerForm */
     public WorkerForm(Worker worker) {
-        logedWorker = worker;
+        WorkerForm.logedWorker=worker;
+        ResourceBundle.clearCache();
+        ResourceBundle translationResource = ResourceBundle.getBundle("Translation", Locale.getDefault());
         initComponents();
-        //set gui to actual worker
+        this.setVisible(true);
+            
         logedUserLabel.setText(worker.getName()+" "+worker.getSurname());
         if(logedWorker.getCurrentShift()==null){// nema smenu
-            startShiftButton.setText("zacit novou smenu -l");
+            startShiftButton.setText(translationResource.getString("WorkerForm.jMenuItem1.text"));
             startBreakButton.setEnabled(false);
             jMenuItem2.setEnabled(false);
             jMenuItem3.setEnabled(false);
             jMenuItem4.setEnabled(false);
         }else{
-            startShiftButton.setText("Skoncit smenu -l");
+            startShiftButton.setText(translationResource.getString("WorkerForm.jMenuItem2.text"));
             startBreakButton.setEnabled(false);
             jMenuItem2.setEnabled(true);
             jMenuItem3.setEnabled(true);
             jMenuItem4.setEnabled(false);
         }
+        System.out.println("zobrazuju okno3");
+    }
+
+    public static Worker getLogedWorker() {
+        return logedWorker;
     }
 
 
@@ -52,8 +69,27 @@ public class WorkerForm extends javax.swing.JFrame {
         }
     }
 
+    class showShiftTableAction extends AbstractAction{
+        public void actionPerformed(ActionEvent e) {
+           new showShiftTableWorker().execute();
+        }
+    }
+
+    class showShiftTableCurrentMonthAction extends AbstractAction{
+        public void actionPerformed(ActionEvent e) {
+           new showShiftTableWorkerCurrentMonth().execute();
+        }
+    }
+
+    class showShiftTableLastMonthAction extends AbstractAction{
+        public void actionPerformed(ActionEvent e) {
+           new showShiftTableWorkerLastMonth().execute();
+        }
+    }
+
     class newShiftAction extends AbstractAction{
         public void actionPerformed(ActionEvent e) {
+            ResourceBundle translationResource = ResourceBundle.getBundle("Translation", Locale.getDefault());
             if(logedWorker.getCurrentShift()==null){//zacina smenu
                 try {
                     logedWorker.startShift();
@@ -62,7 +98,7 @@ public class WorkerForm extends javax.swing.JFrame {
                 }
                     logedWorker.getCurrentShift().save();
                     logedWorker.save();
-                    startShiftButton.setText("End shift -l");
+                    startShiftButton.setText(translationResource.getString("WorkerForm.jMenuItem2.text"));
                     startBreakButton.setEnabled(true);
                     jMenuItem1.setEnabled(false);
                     jMenuItem2.setEnabled(true);
@@ -76,7 +112,7 @@ public class WorkerForm extends javax.swing.JFrame {
                 }
                     logedWorker.save();
                     startBreakButton.setEnabled(false);
-                    startShiftButton.setText("Start shift-l");
+                    startShiftButton.setText(translationResource.getString("WorkerForm.jMenuItem1.text"));
                     jMenuItem1.setEnabled(true);
                     jMenuItem2.setEnabled(false);
                     jMenuItem3.setEnabled(false);
@@ -87,6 +123,7 @@ public class WorkerForm extends javax.swing.JFrame {
 
     class startBreakAction extends AbstractAction{
         public void actionPerformed(ActionEvent e) {
+            ResourceBundle translationResource = ResourceBundle.getBundle("Translation", Locale.getDefault());
             if(startedBreak){//ma zapocatou prestavku->konci break
                 try {
                     logedWorker.endBreak();
@@ -95,7 +132,7 @@ public class WorkerForm extends javax.swing.JFrame {
                     Logger.getLogger(WorkerForm.class.getName()).log(Level.SEVERE, null, ex);
                 }
                     startedBreak=false;
-                    startBreakButton.setText("start break -l");
+                    startBreakButton.setText(translationResource.getString("WorkerForm.jMenuItem1.text"));
                     jMenuItem2.setEnabled(true);
                     jMenuItem3.setEnabled(true);
                     jMenuItem4.setEnabled(false);
@@ -107,7 +144,7 @@ public class WorkerForm extends javax.swing.JFrame {
                 } catch (WorkerException ex) {
                     Logger.getLogger(WorkerForm.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                startBreakButton.setText("end break -l");
+                startBreakButton.setText(translationResource.getString("WorkerForm.jMenuItem2.text"));
                 jMenuItem1.setEnabled(false);
                 jMenuItem2.setEnabled(false);
                 jMenuItem3.setEnabled(false);
@@ -116,6 +153,66 @@ public class WorkerForm extends javax.swing.JFrame {
                 startedBreak=true;
             }
 
+        }
+    }
+
+    class showShiftTableWorker extends SwingWorker<Integer, Integer>{
+        @Override
+        protected Integer doInBackground() throws Exception {
+            ShiftsForm frm = new ShiftsForm();
+            frm.setVisible(true);
+            JTable table = frm.getjTable1();
+            ShiftTableModel model = (ShiftTableModel)table.getModel();
+            List<Shift> shifts = (List<Shift>) ShiftManager.getInstance().findByWorkerID(WorkerForm.getLogedWorker().getID());
+            model.addShifts(shifts);
+            model.fireTableDataChanged();
+            return 0;
+        }
+    }
+
+    class showShiftTableWorkerCurrentMonth extends SwingWorker<Integer, Integer>{
+        @Override
+        protected Integer doInBackground() throws Exception {
+            ShiftsForm frm = new ShiftsForm();
+            frm.setVisible(true);
+            JTable table = frm.getjTable1();
+            ShiftTableModel model = (ShiftTableModel)table.getModel();
+            GregorianCalendar now = new GregorianCalendar();
+            int lastDay = now.getActualMaximum(GregorianCalendar.DATE);
+            int firstDay = now.getActualMinimum(GregorianCalendar.DATE);
+            int month = now.get(GregorianCalendar.MONTH);
+            int year = now.get(GregorianCalendar.YEAR);
+            Timestamp startTime = new Timestamp(new GregorianCalendar(year, month, firstDay).getTimeInMillis());
+            Timestamp endTime = new Timestamp(new GregorianCalendar(year, month, lastDay).getTimeInMillis());
+            System.out.println(startTime.getTime());
+            System.out.println(endTime.getTime());
+            List<Shift> shifts = (List<Shift>) ShiftManager.getInstance().findStartBetween(startTime,endTime,WorkerForm.getLogedWorker().getID());
+            model.addShifts(shifts);
+            model.fireTableDataChanged();
+            return 0;
+        }
+    }
+    class showShiftTableWorkerLastMonth extends SwingWorker<Integer, Integer>{
+        @Override
+        protected Integer doInBackground() throws Exception {
+            ShiftsForm frm = new ShiftsForm();
+            frm.setVisible(true);
+            JTable table = frm.getjTable1();
+            ShiftTableModel model = (ShiftTableModel)table.getModel();
+            GregorianCalendar now = new GregorianCalendar();
+            GregorianCalendar lastMonth = new GregorianCalendar(now.get(GregorianCalendar.YEAR), now.get(GregorianCalendar.MONTH)-1, now.get(GregorianCalendar.DAY_OF_MONTH));
+            int lastDay = lastMonth.getActualMaximum(GregorianCalendar.DATE);
+            int firstDay = lastMonth.getActualMinimum(GregorianCalendar.DATE);
+            int month = lastMonth.get(GregorianCalendar.MONTH);
+            int year = lastMonth.get(GregorianCalendar.YEAR);
+            Timestamp startTime = new Timestamp(new GregorianCalendar(year, month, firstDay).getTimeInMillis());
+            Timestamp endTime = new Timestamp(new GregorianCalendar(year, month, lastDay).getTimeInMillis());
+            System.out.println(startTime.getTime());
+            System.out.println(endTime.getTime());
+            List<Shift> shifts = (List<Shift>) ShiftManager.getInstance().findStartBetween(startTime,endTime,WorkerForm.getLogedWorker().getID());
+            model.addShifts(shifts);
+            model.fireTableDataChanged();
+            return 0;
         }
     }
 
@@ -147,72 +244,75 @@ public class WorkerForm extends javax.swing.JFrame {
         jMenuItem8 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Worker");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Translation"); // NOI18N
+        setTitle(bundle.getString("WorkerForm.title")); // NOI18N
 
-        info1Label.setText("Currently loggged as:");
+        info1Label.setText(bundle.getString("WorkerForm.info1Label.text")); // NOI18N
 
-        logedUserLabel.setText("Steve Wozniak");
+        logedUserLabel.setText(bundle.getString("WorkerForm.logedUserLabel.text")); // NOI18N
 
-        endShiftButton.setText("Logout");
+        endShiftButton.setAction(new logoutAction());
+        endShiftButton.setText(bundle.getString("WorkerForm.endShiftButton.text")); // NOI18N
 
         startShiftButton.setAction(new newShiftAction());
-        startShiftButton.setText("New Shift");
+        startShiftButton.setText(bundle.getString("WorkerForm.startShiftButton.text")); // NOI18N
 
         startBreakButton.setAction(new startBreakAction());
-        startBreakButton.setText("Break");
+        startBreakButton.setText(bundle.getString("WorkerForm.startBreakButton.text")); // NOI18N
         startBreakButton.setEnabled(false);
 
         jMenu1.setMnemonic('S');
-        jMenu1.setText("Shift");
+        jMenu1.setText(bundle.getString("WorkerForm.jMenu1.text")); // NOI18N
 
         jMenuItem1.setAction(new newShiftAction());
         jMenuItem1.setMnemonic('N');
-        jMenuItem1.setText("New Shift");
+        jMenuItem1.setText(bundle.getString("WorkerForm.jMenuItem1.text")); // NOI18N
         jMenu1.add(jMenuItem1);
 
         jMenuItem2.setAction(new newShiftAction());
         jMenuItem2.setMnemonic('S');
-        jMenuItem2.setText("End Shift");
+        jMenuItem2.setText(bundle.getString("WorkerForm.jMenuItem2.text")); // NOI18N
         jMenu1.add(jMenuItem2);
 
         jMenuItem3.setAction(new startBreakAction());
         jMenuItem3.setMnemonic('B');
-        jMenuItem3.setText("Start Break");
+        jMenuItem3.setText(bundle.getString("WorkerForm.jMenuItem3.text")); // NOI18N
         jMenu1.add(jMenuItem3);
 
         jMenuItem4.setAction(new startBreakAction());
         jMenuItem4.setMnemonic('E');
-        jMenuItem4.setText("End Break");
+        jMenuItem4.setText(bundle.getString("WorkerForm.jMenuItem4.text")); // NOI18N
         jMenu1.add(jMenuItem4);
 
         jMenuBar1.add(jMenu1);
 
         jMenu2.setMnemonic('V');
-        jMenu2.setText("View");
+        jMenu2.setText(bundle.getString("WorkerForm.jMenu2.text")); // NOI18N
 
-        jMenuItem5.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItem5.setAction(new showShiftTableAction());
         jMenuItem5.setMnemonic('A');
-        jMenuItem5.setText("View All My Shifts");
-        jMenuItem5.setActionCommand("All My Shifts");
+        jMenuItem5.setText(bundle.getString("WorkerForm.jMenuItem5.text")); // NOI18N
+        jMenuItem5.setActionCommand(bundle.getString("WorkerForm.jMenuItem5.actionCommand")); // NOI18N
         jMenu2.add(jMenuItem5);
 
-        jMenuItem6.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItem6.setAction(new showShiftTableCurrentMonthAction());
         jMenuItem6.setMnemonic('M');
-        jMenuItem6.setText("My Shifts (Current Month)");
+        jMenuItem6.setText(bundle.getString("WorkerForm.jMenuItem6.text")); // NOI18N
         jMenu2.add(jMenuItem6);
 
+        jMenuItem7.setAction(new showShiftTableLastMonthAction());
         jMenuItem7.setMnemonic('L');
-        jMenuItem7.setText("My Shifts (Last Month)");
+        jMenuItem7.setText(bundle.getString("WorkerForm.jMenuItem7.text")); // NOI18N
         jMenu2.add(jMenuItem7);
 
         jMenuBar1.add(jMenu2);
 
         jMenu3.setMnemonic('L');
-        jMenu3.setText("Logout");
+        jMenu3.setText(bundle.getString("WorkerForm.jMenu3.text")); // NOI18N
 
         jMenuItem8.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.event.InputEvent.CTRL_MASK));
         jMenuItem8.setMnemonic('L');
-        jMenuItem8.setText("Logout");
+        jMenuItem8.setText(bundle.getString("WorkerForm.jMenuItem8.text")); // NOI18N
         jMenu3.add(jMenuItem8);
 
         jMenuBar1.add(jMenu3);

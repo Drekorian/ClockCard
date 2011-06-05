@@ -45,6 +45,8 @@ public class ShiftManager extends ADatabaseManager {
      * method.
      */
     private ShiftManager() {
+        testingMode = false;
+        dataSource = getProductionDataSource();
     }
 
     @Override
@@ -150,7 +152,7 @@ public class ShiftManager extends ADatabaseManager {
 
         return null;
     }
-    @Override
+  
     public long count() {
         Connection connection = null;
         Statement statement;
@@ -197,7 +199,6 @@ public class ShiftManager extends ADatabaseManager {
         PreparedStatement statement;
         ResultSet resultSet;
         ArrayList<Shift> result = null;
-
         try {
             connection = getDataSource().getConnection();
             result = new ArrayList<Shift>();
@@ -230,19 +231,17 @@ public class ShiftManager extends ADatabaseManager {
                 result.add(shift);
             }
         } catch (SQLException ex) {
-            //TODO: log an exception
+            Logger.getLogger(ShiftManager.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 connection.close();
             } catch (SQLException ex) {
-                //TOOD: log an exception
+                Logger.getLogger(ShiftManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-
         if (result != null) {
             return Collections.unmodifiableList(result);
         }
-
         return null;
     }
     /**
