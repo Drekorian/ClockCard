@@ -2,6 +2,10 @@ package cz.muni.fi.pv168.clockcard;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -35,8 +39,48 @@ public class Supervisor {
         return PASSWORD.equals(password);
     }
 
-    //public static get
+    /**
+     * TODO: Javadoc
+     *
+     * @param start
+     * @param end
+     * @return
+     */
+    private static List<Shift> getShiftsByMonth(Calendar start, Calendar end) {
+        return ShiftManager.getInstance().findStartBetween(new Timestamp(start.getTimeInMillis()), new Timestamp(end.getTimeInMillis()));
+    }
+    /**
+     * TODO: Javadoc
+     *
+     * @return
+     */
+    public static List<Shift> getLastMonthShifts() {
+        Calendar now = new GregorianCalendar();
 
+        int year = now.get(Calendar.YEAR);
+        int month = now.get(Calendar.MONTH) - 1;
+        int daysInMonth = now.getMaximum(Calendar.DAY_OF_MONTH);
+        
+        return getShiftsByMonth(new GregorianCalendar(year, month, 1), new GregorianCalendar(year, month, daysInMonth));
+    }
+    /**
+     * TODO: Javadoc
+     *
+     * @return
+     */
+    public static List<Shift> getCurrentMonthShifts() {
+        Calendar now = new GregorianCalendar();
+
+        int year = now.get(Calendar.YEAR);
+        int month = now.get(Calendar.MONTH);
+        int daysInMonth = now.getMaximum(Calendar.DAY_OF_MONTH);
+
+        return getShiftsByMonth(new GregorianCalendar(year, month, 1), new GregorianCalendar(year, month, daysInMonth));
+    }
+    /**
+     * TODO: Javadoc
+     * @return
+     */
     public static Properties loadProperties() {
         FileInputStream inputStream = null;
         Properties _properties = null;

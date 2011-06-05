@@ -308,24 +308,27 @@ public class ShiftManager implements IDatabaseManager {
         }
         return null;
     }
-    /**
-     * Returns a list of shifts that start between given parameters.
-     *
-     * @param begin begin of the interval
-     * @param end end of the interval
-     * @return list of shifts that start between given parameters
-     */
-    public List<Shift> findStartBetween(Timestamp begin, Timestamp end) {
-    Connection connection = null;
+
+    public List<Shift> findStartBetween(Timestamp begin, Timestamp end, Long workerID) {
+        Connection connection = null;
         PreparedStatement preparedStatement;
         ResultSet resultSet;
         ArrayList<Shift> result = null;
 
         try {
             connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement(classProperties.getProperty("findBetweenQuery"));
+            if (workerID == null) {
+                preparedStatement = connection.prepareStatement(classProperties.getProperty("findStartBetweenQuery"));
+            } else {
+                preparedStatement = connection.prepareStatement(classProperties.getProperty("findStartBetweenQueryID"));
+            }
+
             preparedStatement.setTimestamp(1, begin);
             preparedStatement.setTimestamp(2, end);
+
+            if (workerID != null) {
+                preparedStatement.setLong(3, workerID);
+            }
 
             resultSet = preparedStatement.executeQuery();
             result = new ArrayList<Shift>();
@@ -370,6 +373,17 @@ public class ShiftManager implements IDatabaseManager {
         }
 
         return new ArrayList<Shift>();
+    }
+
+    /**
+     * Returns a list of shifts that start between given parameters.
+     *
+     * @param begin begin of the interval
+     * @param end end of the interval
+     * @return list of shifts that start between given parameters
+     */
+    public List<Shift> findStartBetween(Timestamp begin, Timestamp end) {
+        return findStartBetween(begin, end, null);
     }
 
     /**
