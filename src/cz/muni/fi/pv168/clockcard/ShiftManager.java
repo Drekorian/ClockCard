@@ -45,6 +45,7 @@ public class ShiftManager extends ADatabaseManager {
      * of ShiftManager solely via getInstance() method.
      */
     private ShiftManager() {
+        LOGGER.finest(CLASS_PROPERTIES.getProperty("log.newInstance"));
     }
 
     @Override
@@ -55,6 +56,7 @@ public class ShiftManager extends ADatabaseManager {
         Shift result = null;
 
         if ((connection = openConnection()) == null) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.connectionFailed"));
             return null;
         }
 
@@ -87,11 +89,15 @@ public class ShiftManager extends ADatabaseManager {
                                          resultSet.getLong("TOTAL_BREAK_TIME"));
             }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.findQueryProcessingFailed"), ex);
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.findFailed"), ex);
         } finally {
             terminateConnection(connection);
         }
-        
+
+        if (result != null) {
+            LOGGER.log(Level.FINEST, "{0}: ({1}|{2}) {3}", new Object[]{ CLASS_PROPERTIES.getProperty("log.findSuccess"), result.getWorkerID(), result.getID(), result.getStart() });
+        }
+
         return result;
     }
     @Override
@@ -101,6 +107,7 @@ public class ShiftManager extends ADatabaseManager {
         ArrayList<Shift> result = null;
 
         if ((connection = openConnection()) == null) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.connectionFailed"));
             return null;
         }
 
@@ -135,9 +142,13 @@ public class ShiftManager extends ADatabaseManager {
                 }
             }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.getAllQueryProcessingFailed"), ex);
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.getAllFailed"), ex);
         } finally {
             terminateConnection(connection);
+        }
+
+        if (result != null) {
+            LOGGER.log(Level.FINEST, "{0} [{1}]", new Object[]{ CLASS_PROPERTIES.getProperty("log.getAllSuccess"), result.size() });
         }
 
         if (result != null) {
@@ -153,6 +164,7 @@ public class ShiftManager extends ADatabaseManager {
         long result = -1;
 
         if ((connection = openConnection()) == null) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.connectionFailed"));
             return -1;
         }
 
@@ -162,9 +174,13 @@ public class ShiftManager extends ADatabaseManager {
                 result = resultSet.getInt(1);
             }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.countQueryProcessingFailed"), ex);
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.countFailed"), ex);
         } finally {
             terminateConnection(connection);
+        }
+
+        if (result > 0) {
+            LOGGER.log(Level.FINEST, "{0} [{1}]", new Object[]{ CLASS_PROPERTIES.getProperty("log.countSuccess"), result });
         }
         
         return result;
@@ -189,6 +205,7 @@ public class ShiftManager extends ADatabaseManager {
         ArrayList<Shift> result = null;
         
         if ((connection = openConnection()) == null) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.connectionFailed"));
             return null;
         }
 
@@ -225,7 +242,7 @@ public class ShiftManager extends ADatabaseManager {
                 }
             }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.findByWorkerIDQueryProcessingFailed"), ex);
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.findByWorkerIDFailed"), ex);
         } finally {
             terminateConnection(connection);
         }
@@ -234,6 +251,10 @@ public class ShiftManager extends ADatabaseManager {
             return Collections.unmodifiableList(result);
         }
         
+        if (result != null) {
+            LOGGER.log(Level.FINEST, "{0}: [{1}]", new Object[]{ CLASS_PROPERTIES.getProperty("log.findSuccess"), result.size() });
+        }
+
         return null;
     }
     /**
@@ -251,6 +272,7 @@ public class ShiftManager extends ADatabaseManager {
         ArrayList<Shift> result = null;
 
         if ((connection = openConnection()) == null) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.connectionFailed"));
             return null;
         }
 
@@ -294,9 +316,13 @@ public class ShiftManager extends ADatabaseManager {
                 }
             }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.findStartBetweenQueryProcessingFailed"), ex);
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.findStartBetweenFailed"), ex);
         } finally {
             terminateConnection(connection);
+        }
+
+        if (result != null) {
+            LOGGER.log(Level.FINEST, "{0}: [{1}]", new Object[]{ CLASS_PROPERTIES.getProperty("log.findStartBetweenSuccess"), result.size() });
         }
 
         if (result != null) {

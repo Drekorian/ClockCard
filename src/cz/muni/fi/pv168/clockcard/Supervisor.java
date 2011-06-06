@@ -42,7 +42,7 @@ public class Supervisor implements IPropertyBased {
      * Parameterless constructor. Forces class to be singleton.
      */
     private Supervisor() {
-        LOGGER.finest(CLASS_PROPERTIES.getProperty("log.newInstance"));
+        LOGGER.log(Level.FINEST, CLASS_PROPERTIES.getProperty("log.newInstance"));
     }
 
     @Override
@@ -87,7 +87,7 @@ public class Supervisor implements IPropertyBased {
         boolean result = CLASS_PROPERTIES.getProperty("password").equals(password);
 
         if (result) {
-            LOGGER.finest(CLASS_PROPERTIES.getProperty("log.correctAuthentication"));
+            LOGGER.log(Level.FINEST, CLASS_PROPERTIES.getProperty("log.correctAuthentication"));
         } else {
             LOGGER.log(Level.INFO, "{0} {1}.", new Object[]{ CLASS_PROPERTIES.getProperty("log.incorrectPassword"), password });
         }

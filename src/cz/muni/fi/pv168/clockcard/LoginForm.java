@@ -12,6 +12,12 @@
 package cz.muni.fi.pv168.clockcard;
 
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import javax.swing.AbstractAction;
 
 /**
@@ -21,6 +27,29 @@ public class LoginForm extends javax.swing.JFrame {
 
     /** Creates new form LoginForm */
     public LoginForm() {
+        Logger clockCardLogger = Logger.getLogger("cz.muni.fi.pv168.clockcard");
+        clockCardLogger.setLevel(Level.ALL);
+        Handler lowHandler = null, mediumHandler = null, highHandler = null;
+
+        try {
+            lowHandler = new FileHandler("log/low.log", true);
+            mediumHandler = new FileHandler("log/medium.log", true);
+            highHandler = new FileHandler("log/high.log", true);
+        } catch (Exception ex) {
+        }
+
+        lowHandler.setLevel(Level.ALL);
+        mediumHandler.setLevel(Level.CONFIG);
+        highHandler.setLevel(Level.WARNING);
+
+        lowHandler.setFormatter(new SimpleFormatter());
+        mediumHandler.setFormatter(new SimpleFormatter());
+        highHandler.setFormatter(new SimpleFormatter());
+
+        clockCardLogger.addHandler(lowHandler);
+        clockCardLogger.addHandler(mediumHandler);
+        clockCardLogger.addHandler(highHandler);
+
         initComponents();
         WorkerManager.getInstance().testingOn();        
     }

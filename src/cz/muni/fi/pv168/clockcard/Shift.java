@@ -42,9 +42,22 @@ public class Shift implements IDatabaseStoreable {
      */
     public static Shift loadShift(long id, long workerID, Calendar start, Calendar end, Calendar lastBreakStart, long totalBreakTime) {
         if (id < 1) {
-            throw new IllegalArgumentException("ID must not be null and must be greater or equal to 1");
+            throw new IllegalArgumentException("ID must not be greater or equal to 1");
+        }
+        
+        if (workerID < 1) {
+            throw new IllegalArgumentException("WorkerID must not be greater or equal to 1");
         }
 
+        if (start == null) {
+            throw new IllegalArgumentException("Start cannot be null");
+        }
+
+        if (totalBreakTime < 0) {
+            throw new IllegalArgumentException("TotalBreakTime must not be greater or equal to 1");
+        }
+        
+        LOGGER.log(Level.FINEST, "{0}: ({1}|{2}) {3}", new Object[]{ CLASS_PROPERTIES.getProperty("log.loadShift"), workerID, id, start });
         return new Shift(id, workerID, start, end, lastBreakStart, totalBreakTime);
     }
     /**
@@ -83,6 +96,7 @@ public class Shift implements IDatabaseStoreable {
      */
     public Shift(long workerID) {
         this(null, workerID, new GregorianCalendar(), null, null, 0);
+        LOGGER.log(Level.FINEST, "{0}: (none|{1}) none", new Object[]{ CLASS_PROPERTIES.getProperty("log.newShift"), workerID });
     }
 
     @Override
@@ -94,6 +108,7 @@ public class Shift implements IDatabaseStoreable {
         boolean result = false;
 
         if ((connection = ShiftManager.getInstance().openConnection()) == null) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.connectionFailed"));
             return false;
         }
 
@@ -114,12 +129,18 @@ public class Shift implements IDatabaseStoreable {
 
         params.add(new QueryParameter(QueryParameter.LONG, totalBreakTime));
 
-        if (id == null) {
-            key = new Long(0);
-            updatedRows = ShiftManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("saveQuery"), params, key);
-        } else {
-            params.add(new QueryParameter(QueryParameter.LONG, id));
-            updatedRows = ShiftManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("updateQuery"), params);
+        try {
+            if (id == null) {
+                key = new Long(0);
+                updatedRows = ShiftManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("saveQuery"), params, key);
+            } else {
+                params.add(new QueryParameter(QueryParameter.LONG, id));
+                updatedRows = ShiftManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("updateQuery"), params);
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.saveFailed"), ex);
+        } finally {
+            ShiftManager.getInstance().terminateConnection(connection);
         }
 
         result = (updatedRows == 1);
@@ -129,10 +150,15 @@ public class Shift implements IDatabaseStoreable {
                 id = key;
             } else {
                 result = false;
+                LOGGER.log(Level.WARNING, CLASS_PROPERTIES.getProperty("log.keyGenerationFailed"));
             }
         }
 
-        ShiftManager.getInstance().terminateConnection(connection);
+        if (result) {
+            LOGGER.log(Level.FINEST, "{0}: ({1}|{2}) {3}", new Object[]{ CLASS_PROPERTIES.getProperty("log.saveSuccess"), workerID, id, start });
+        } else {
+            LOGGER.log(Level.WARNING, "{0}: ({1}|{2}) {3}", new Object[]{ CLASS_PROPERTIES.getProperty("log.saveFailed"), workerID, id, start });
+        }
 
         return result;
     }
@@ -148,15 +174,25 @@ public class Shift implements IDatabaseStoreable {
         boolean result = false;
 
         if ((connection = ShiftManager.getInstance().openConnection()) == null) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.connectionFailed"));
             return false;
         }
 
         params = new ArrayList<QueryParameter>();
         params.add(new QueryParameter(QueryParameter.LONG, id));
-        updatedRows = ShiftManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("deleteQuery"), params);
-        result = (updatedRows == 1);
+        try {
+            result = (ShiftManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("deleteQuery"), params) == 1);
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.destroyFailed"), ex);
+        }
         
         ShiftManager.getInstance().terminateConnection(connection);
+
+        if (result) {
+            LOGGER.log(Level.FINEST, "{0}: ({1}|{2}) {3}", new Object[]{ CLASS_PROPERTIES.getProperty("log.destroySuccess"), workerID, id, start });
+        } else {
+            LOGGER.log(Level.WARNING, "{0}: ({1}|{2}) {3}", new Object[]{ CLASS_PROPERTIES.getProperty("log.destroyFailed"), workerID, id, start });
+        }
 
         return result;
     }

@@ -53,14 +53,15 @@ public class WorkerManager extends ADatabaseManager {
         Worker result = null;
 
         if ((connection = openConnection()) == null) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.connectionFailed"));
             return null;
         }        
 
         params = new ArrayList<QueryParameter>();
         params.add(new QueryParameter(QueryParameter.LONG, id));
-        resultSet = executeQuery(connection, CLASS_PROPERTIES.getProperty("findQuery"), params);
         
         try {
+            resultSet = executeQuery(connection, CLASS_PROPERTIES.getProperty("findQuery"), params);
             if (resultSet != null && resultSet.getFetchSize() == 1 && resultSet.next()) {
                 result = Worker.loadWorker(resultSet.getLong("ID"),
                                            resultSet.getString("NAME"),
@@ -71,9 +72,13 @@ public class WorkerManager extends ADatabaseManager {
                                            resultSet.getBoolean("SUSPENDED"));
                 }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.findQueryProcessingFailed"), ex);
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.findFailed"), ex);
         } finally {
             terminateConnection(connection);
+        }
+
+        if (result != null) {
+            LOGGER.log(Level.FINEST, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.findSuccess"), result.getName(), result.getSurname() });
         }
         
         return result;
@@ -85,6 +90,7 @@ public class WorkerManager extends ADatabaseManager {
         List<Worker> result = null;
 
         if ((connection = openConnection()) == null) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.connectionFailed"));
             return null;
         }
 
@@ -103,13 +109,17 @@ public class WorkerManager extends ADatabaseManager {
                 result.add(worker);
             }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.getAllQueryProcessingFailed"), ex);
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.getAllFailed"), ex);
         } finally {
             terminateConnection(connection);
         }
         
         if (result != null) {
             return Collections.unmodifiableList(result);
+        }
+
+        if (result != null) {
+            LOGGER.log(Level.FINEST, "{0} [{1}]", new Object[]{ CLASS_PROPERTIES.getProperty("log.getAllSuccess"), result.size() });
         }
 
         return null;
@@ -121,6 +131,7 @@ public class WorkerManager extends ADatabaseManager {
         int result = 0;
 
         if ((connection = openConnection()) == null) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.connectionFailed"));
             return -1;
         }
 
@@ -132,9 +143,13 @@ public class WorkerManager extends ADatabaseManager {
             }
         } catch (SQLException ex) {
             result = -1;
-            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.countQueryProcessingFailed"), ex);
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.countFailed"), ex);
         } finally {
             terminateConnection(connection);
+        }
+
+        if (result > 0) {
+            LOGGER.log(Level.FINEST, "{0} [{1}]", new Object[]{ CLASS_PROPERTIES.getProperty("log.countSuccess"), result });
         }
         
         return result;
@@ -155,6 +170,7 @@ public class WorkerManager extends ADatabaseManager {
         Worker result = null;
 
         if ((connection = openConnection()) == null) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.connectionFailed"));
             return null;
         }
 
@@ -174,9 +190,13 @@ public class WorkerManager extends ADatabaseManager {
                                            resultSet.getBoolean(7));
             }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.findByLoginQueryProcessingFailed"), ex);
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.findByLoginFailed"), ex);
         } finally {
             terminateConnection(connection);
+        }
+
+        if (result != null) {
+            LOGGER.log(Level.FINEST, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.findByLoginSuccess"), result.getName(), result.getSurname() });
         }
         
         return result;

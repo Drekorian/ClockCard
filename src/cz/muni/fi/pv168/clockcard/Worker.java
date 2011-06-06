@@ -112,6 +112,7 @@ public class Worker implements IDatabaseStoreable {
         boolean result = false;
 
         if ((connection = WorkerManager.getInstance().openConnection()) == null) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.connectionFailed"));
             return false;
         }
 
@@ -127,12 +128,18 @@ public class Worker implements IDatabaseStoreable {
         }
         params.add(new QueryParameter(QueryParameter.BOOLEAN, suspended));
 
-        if (id == null) {
-            key = new Long(0);
-            updatedRows = WorkerManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("saveQuery"), params, key);
-        } else {
-            params.add(new QueryParameter(QueryParameter.LONG, id));
-            updatedRows = WorkerManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("updateQuery"), params);
+        try {
+            if (id == null) {
+                key = new Long(0);
+                updatedRows = WorkerManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("saveQuery"), params, key);
+            } else {
+                params.add(new QueryParameter(QueryParameter.LONG, id));
+                updatedRows = WorkerManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("updateQuery"), params);
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.saveFailed"), name, surname });
+        } finally {
+            WorkerManager.getInstance().terminateConnection(connection);
         }
 
         result = (updatedRows == 1);
@@ -146,10 +153,8 @@ public class Worker implements IDatabaseStoreable {
             }
         }
         
-        WorkerManager.getInstance().terminateConnection(connection);    
-
         if (result) {
-            LOGGER.log(Level.FINEST, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.save"), name, surname });
+            LOGGER.log(Level.FINEST, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.saveSuccess"), name, surname });
         } else {
             LOGGER.log(Level.WARNING, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.saveFailed"), name, surname });
         }
@@ -167,16 +172,22 @@ public class Worker implements IDatabaseStoreable {
         boolean result = false;
 
         if ((connection = WorkerManager.getInstance().openConnection()) == null) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.connectionFailed"));
             return false;
         }
 
         params = new ArrayList<QueryParameter>();
         params.add(new QueryParameter(QueryParameter.LONG, id));
-        result = (WorkerManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("deleteQuery"), params) == 1);
-        WorkerManager.getInstance().terminateConnection(connection);
+        try {
+            result = (WorkerManager.getInstance().executeUpdate(connection, CLASS_PROPERTIES.getProperty("deleteQuery"), params) == 1);
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.destroyFailed"), ex);
+        } finally {
+            WorkerManager.getInstance().terminateConnection(connection);
+        }
 
         if (result) {
-            LOGGER.log(Level.FINEST, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.destroy"), name, surname });
+            LOGGER.log(Level.FINEST, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.destroySuccess"), name, surname });
         } else {
             LOGGER.log(Level.WARNING, "{0}: {1} {2}", new Object[]{ CLASS_PROPERTIES.getProperty("log.destroyFailed"), name, surname });
         }
