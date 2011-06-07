@@ -170,7 +170,6 @@ public class Shift implements IDatabaseStoreable {
 
         Connection connection = null;
         List<QueryParameter> params;
-        int updatedRows = 0;
         boolean result = false;
 
         if ((connection = ShiftManager.getInstance().openConnection()) == null) {
