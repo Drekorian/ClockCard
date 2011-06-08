@@ -11,16 +11,60 @@
 
 package cz.muni.fi.pv168.clockcard;
 
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import javax.swing.AbstractAction;
+import javax.swing.SwingWorker;
+
 /**
  *
  * @author Marek
  */
 public class LoginManagerDialog extends javax.swing.JDialog {
-
     /** Creates new form LoginManagerDialog */
+    private Frame parent;
     public LoginManagerDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
+        this.parent=parent;
         initComponents();
+    }
+
+
+    class loginManagerAction extends AbstractAction{
+        public void actionPerformed(ActionEvent e) {
+            new loginManagerWorker().execute();
+        }
+    }
+
+    class cancelAction extends AbstractAction{
+        public void actionPerformed(ActionEvent e) {
+            dispose();
+            parent.setVisible(true);
+        }
+    }
+
+    class loginManagerWorker extends SwingWorker<Integer, Integer>{
+        @Override
+        protected Integer doInBackground() throws Exception {
+            System.out.println("pred rozhodnutim-");
+            ResourceBundle.clearCache();
+            ResourceBundle translationResource = ResourceBundle.getBundle("Translation", Locale.getDefault());
+            labelInfo.setText(translationResource.getString("LoginWorkerDialog.logging"));
+            String text = String.valueOf(passPassword.getPassword());
+            System.out.println("pred rozhodnutim");
+            if(Supervisor.getInstance().authenticate(text)){
+                System.out.println("authenticated");
+                new ManagerForm().setVisible(true);
+            }else{
+                System.out.println("authenticated");
+                labelInfo.setText(translationResource.getString("LoginWorkerDialog.wrongPassword"));
+            }
+            System.out.println("po rozhodnutim");
+            return 0;
+        }
+
     }
 
     /** This method is called from within the constructor to
@@ -32,26 +76,26 @@ public class LoginManagerDialog extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton2 = new javax.swing.JButton();
-        jLabel2 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jPasswordField1 = new javax.swing.JPasswordField();
+        btnCancel = new javax.swing.JButton();
+        labelPassword = new javax.swing.JLabel();
+        btnOk = new javax.swing.JButton();
+        passPassword = new javax.swing.JPasswordField();
+        labelInfo = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Translation"); // NOI18N
         setTitle(bundle.getString("LoginManagerDialog.title")); // NOI18N
         setResizable(false);
 
-        jButton2.setText(bundle.getString("LoginManagerDialog.jButton2.text")); // NOI18N
-        jButton2.setName("jButton2"); // NOI18N
+        btnCancel.setAction(new cancelAction());
+        btnCancel.setText(bundle.getString("LoginManagerDialog.btnCancel.text")); // NOI18N
 
-        jLabel2.setText(bundle.getString("LoginManagerDialog.jLabel2.text")); // NOI18N
-        jLabel2.setName("jLabel2"); // NOI18N
+        labelPassword.setText(bundle.getString("LoginManagerDialog.labelPassword.text")); // NOI18N
 
-        jButton1.setText(bundle.getString("LoginManagerDialog.jButton1.text")); // NOI18N
-        jButton1.setName("jButton1"); // NOI18N
+        btnOk.setAction(new loginManagerAction());
+        btnOk.setText(bundle.getString("LoginManagerDialog.btnOk.text")); // NOI18N
 
-        jPasswordField1.setName("jPasswordField1"); // NOI18N
+        labelInfo.setText(bundle.getString("LoginManagerDialog.labelInfo.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -59,56 +103,48 @@ public class LoginManagerDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel2)
-                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(labelInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 263, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton2))
-                    .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(19, Short.MAX_VALUE))
+                        .addComponent(labelPassword)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(passPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(46, Short.MAX_VALUE))
         );
+
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnCancel, btnOk});
+
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(41, 41, 41)
+                .addGap(7, 7, 7)
+                .addComponent(labelInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(4, 4, 4)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
+                    .addComponent(labelPassword)
+                    .addComponent(passPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2))
-                .addContainerGap(24, Short.MAX_VALUE))
+                    .addComponent(btnOk)
+                    .addComponent(btnCancel))
+                .addContainerGap(30, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-    * @param args the command line arguments
-    */
-    public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                LoginManagerDialog dialog = new LoginManagerDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JPasswordField jPasswordField1;
+    private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnOk;
+    private javax.swing.JLabel labelInfo;
+    private javax.swing.JLabel labelPassword;
+    private javax.swing.JPasswordField passPassword;
     // End of variables declaration//GEN-END:variables
 
 }

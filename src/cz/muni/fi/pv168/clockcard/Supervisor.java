@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  */
 
 public class Supervisor implements IPropertyBased {
-    private static final String CLASS_PROPERTY_FILE = "Supervisor.java";
+    private static final String CLASS_PROPERTY_FILE = "Supervisor.properties";
     private static final Logger LOGGER = Logger.getLogger(Supervisor.class.getName());
 
     private static Supervisor instance = null;
@@ -31,10 +31,11 @@ public class Supervisor implements IPropertyBased {
      * @return
      */
     public static Supervisor getInstance() {
+        System.out.println("neco");
         if (instance == null) {
             instance = new Supervisor();
         }
-
+        System.out.println("odevzdavam instanci"+instance);
         return instance;
     }
 
@@ -80,18 +81,19 @@ public class Supervisor implements IPropertyBased {
      * @return true is the passwords match, false otherwise
      */
     public boolean authenticate(String password) {
+        System.out.println("pred rozhodnutim2");
         if (password == null || password.equals("")) {
             throw new IllegalArgumentException("Password cannot be null or empty.");
         }
-
+        System.out.println("pred rozhodnutim3");
         boolean result = CLASS_PROPERTIES.getProperty("password").equals(password);
-
+        System.out.println("pred rozhodnutim4");
         if (result) {
             LOGGER.log(Level.FINEST, CLASS_PROPERTIES.getProperty("log.correctAuthentication"));
         } else {
             LOGGER.log(Level.INFO, "{0} {1}.", new Object[]{ CLASS_PROPERTIES.getProperty("log.incorrectPassword"), password });
         }
-
+        System.out.println("pred rozhodnutim5");
         return result;
     }
     /**

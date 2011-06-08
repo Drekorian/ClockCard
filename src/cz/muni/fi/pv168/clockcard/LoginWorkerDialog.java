@@ -35,7 +35,7 @@ public class LoginWorkerDialog extends javax.swing.JDialog {
         btnCancel = new javax.swing.JButton();
         infoLabel = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Translation"); // NOI18N
         setTitle(bundle.getString("LoginWorkerDialog.title")); // NOI18N
         setResizable(false);
