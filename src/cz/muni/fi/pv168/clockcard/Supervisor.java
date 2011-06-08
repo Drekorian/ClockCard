@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  */
 
 public class Supervisor implements IPropertyBased {
-    private static final String CLASS_PROPERTY_FILE = "Supervisor.java";
+    private static final String CLASS_PROPERTY_FILE = "src/Supervisor.properties";
     private static final Logger LOGGER = Logger.getLogger(Supervisor.class.getName());
 
     private static Supervisor instance = null;
@@ -55,7 +55,7 @@ public class Supervisor implements IPropertyBased {
             properties = new Properties();
             properties.load(inputStream);
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, CLASS_PROPERTIES.getProperty("log.propertyLoadFail"), ex);
+            throw new RuntimeException("Failed to load Supervisor properties", ex);
         } finally {
             if (inputStream != null) {
                 try {
