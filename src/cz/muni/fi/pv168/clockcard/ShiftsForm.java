@@ -10,15 +10,13 @@
  */
 package cz.muni.fi.pv168.clockcard;
 
-import cz.muni.fi.pv168.clockcard.IDatabaseStoreable;
 import cz.muni.fi.pv168.clockcard.Shift;
-import java.security.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
@@ -33,6 +31,11 @@ public class ShiftsForm extends javax.swing.JFrame {
         initComponents();
     }
 
+    public JScrollPane getjScrollPane1() {
+        return jScrollPane1;
+    }
+
+    
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is

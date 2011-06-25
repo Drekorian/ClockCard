@@ -23,14 +23,24 @@ import javax.swing.SwingWorker;
  * @author Marek
  */
 public class LoginManagerDialog extends javax.swing.JDialog {
+
     /** Creates new form LoginManagerDialog */
     private Frame parent;
+    private static LoginManagerDialog thisWindows;
     public LoginManagerDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         this.parent=parent;
         initComponents();
+        setThisWindows();
     }
 
+    public static LoginManagerDialog getThisWindows() {
+        return thisWindows;
+    }
+
+    private void setThisWindows(){
+        thisWindows=this;
+    }
 
     class loginManagerAction extends AbstractAction{
         public void actionPerformed(ActionEvent e) {
@@ -48,20 +58,16 @@ public class LoginManagerDialog extends javax.swing.JDialog {
     class loginManagerWorker extends SwingWorker<Integer, Integer>{
         @Override
         protected Integer doInBackground() throws Exception {
-            System.out.println("pred rozhodnutim-");
             ResourceBundle.clearCache();
             ResourceBundle translationResource = ResourceBundle.getBundle("Translation", Locale.getDefault());
             labelInfo.setText(translationResource.getString("LoginWorkerDialog.logging"));
             String text = String.valueOf(passPassword.getPassword());
-            System.out.println("pred rozhodnutim");
             if(Supervisor.getInstance().authenticate(text)){
-                System.out.println("authenticated");
+                LoginManagerDialog.getThisWindows().dispose();
                 new ManagerForm().setVisible(true);
             }else{
-                System.out.println("authenticated");
                 labelInfo.setText(translationResource.getString("LoginWorkerDialog.wrongPassword"));
             }
-            System.out.println("po rozhodnutim");
             return 0;
         }
 

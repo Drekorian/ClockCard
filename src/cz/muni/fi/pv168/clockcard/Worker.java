@@ -261,6 +261,12 @@ public class Worker implements IDatabaseStoreable {
 
         this.surname = surname;
     }
+
+    public String getPassword() {
+        return password;
+    }
+    
+
     /**
      * Returns worker's login.
      *

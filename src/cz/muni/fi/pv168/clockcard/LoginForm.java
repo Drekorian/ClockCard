@@ -108,9 +108,7 @@ public class LoginForm extends javax.swing.JFrame {
 
         jMenuBar1.add(loginMenu);
 
-        helpMenu.setMnemonic('H');
-        helpMenu.setText(bundle.getString("LoginForm.helpMenu.text")); // NOI18N
-
+        jMenuItem3.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
         jMenuItem3.setMnemonic('A');
         jMenuItem3.setText(bundle.getString("LoginForm.jMenuItem3.text")); // NOI18N
         jMenuItem3.addActionListener(new java.awt.event.ActionListener() {

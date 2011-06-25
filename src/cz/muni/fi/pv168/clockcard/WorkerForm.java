@@ -144,7 +144,7 @@ public class WorkerForm extends javax.swing.JFrame {
                 } catch (WorkerException ex) {
                     Logger.getLogger(WorkerForm.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                startBreakButton.setText(translationResource.getString("WorkerForm.jMenuItem2.text"));
+                startBreakButton.setText(translationResource.getString("WorkerForm.jMenuItem4.text"));
                 jMenuItem1.setEnabled(false);
                 jMenuItem2.setEnabled(false);
                 jMenuItem3.setEnabled(false);
@@ -265,21 +265,25 @@ public class WorkerForm extends javax.swing.JFrame {
         jMenu1.setText(bundle.getString("WorkerForm.jMenu1.text")); // NOI18N
 
         jMenuItem1.setAction(new newShiftAction());
+        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
         jMenuItem1.setMnemonic('N');
         jMenuItem1.setText(bundle.getString("WorkerForm.jMenuItem1.text")); // NOI18N
         jMenu1.add(jMenuItem1);
 
         jMenuItem2.setAction(new newShiftAction());
+        jMenuItem2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_MASK));
         jMenuItem2.setMnemonic('S');
         jMenuItem2.setText(bundle.getString("WorkerForm.jMenuItem2.text")); // NOI18N
         jMenu1.add(jMenuItem2);
 
         jMenuItem3.setAction(new startBreakAction());
+        jMenuItem3.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
         jMenuItem3.setMnemonic('B');
         jMenuItem3.setText(bundle.getString("WorkerForm.jMenuItem3.text")); // NOI18N
         jMenu1.add(jMenuItem3);
 
         jMenuItem4.setAction(new startBreakAction());
+        jMenuItem4.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
         jMenuItem4.setMnemonic('E');
         jMenuItem4.setText(bundle.getString("WorkerForm.jMenuItem4.text")); // NOI18N
         jMenu1.add(jMenuItem4);
@@ -290,17 +294,20 @@ public class WorkerForm extends javax.swing.JFrame {
         jMenu2.setText(bundle.getString("WorkerForm.jMenu2.text")); // NOI18N
 
         jMenuItem5.setAction(new showShiftTableAction());
+        jMenuItem5.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.ALT_MASK));
         jMenuItem5.setMnemonic('A');
         jMenuItem5.setText(bundle.getString("WorkerForm.jMenuItem5.text")); // NOI18N
         jMenuItem5.setActionCommand(bundle.getString("WorkerForm.jMenuItem5.actionCommand")); // NOI18N
         jMenu2.add(jMenuItem5);
 
         jMenuItem6.setAction(new showShiftTableCurrentMonthAction());
+        jMenuItem6.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, java.awt.event.InputEvent.ALT_MASK));
         jMenuItem6.setMnemonic('M');
         jMenuItem6.setText(bundle.getString("WorkerForm.jMenuItem6.text")); // NOI18N
         jMenu2.add(jMenuItem6);
 
         jMenuItem7.setAction(new showShiftTableLastMonthAction());
+        jMenuItem7.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.event.InputEvent.ALT_MASK));
         jMenuItem7.setMnemonic('L');
         jMenuItem7.setText(bundle.getString("WorkerForm.jMenuItem7.text")); // NOI18N
         jMenu2.add(jMenuItem7);
@@ -308,7 +315,6 @@ public class WorkerForm extends javax.swing.JFrame {
         jMenuBar1.add(jMenu2);
 
         jMenu3.setMnemonic('L');
-        jMenu3.setText(bundle.getString("WorkerForm.jMenu3.text")); // NOI18N
 
         jMenuItem8.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.event.InputEvent.CTRL_MASK));
         jMenuItem8.setMnemonic('L');
