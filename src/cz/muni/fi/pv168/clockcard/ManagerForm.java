@@ -90,8 +90,10 @@ public class ManagerForm extends javax.swing.JFrame {
                 data = Supervisor.getInstance().getLastMonthShifts();
             }
             if (data.isEmpty()) {
-                this.cancel(true);
-            } else {
+                //this.cancel(true);
+                data = new ArrayList<Shift>();
+                data.add(null);
+            }
                 ShiftsForm form = new ShiftsForm();
                 ShiftTableModel mod = new ShiftTableModel();
                 mod.addShifts(data);
@@ -99,7 +101,6 @@ public class ManagerForm extends javax.swing.JFrame {
                 mod.fireTableDataChanged();
                 form.getjTable1().setModel(mod);
                 form.setVisible(true);
-            }
             return 0;
         }
     }
