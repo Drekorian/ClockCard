@@ -258,12 +258,12 @@ public class ShiftManager extends ADatabaseManager {
         return null;
     }
     /**
-     * TOOD: JAVADOC
+     * Returns shifts that start between given interval from the database.
      *
-     * @param begin
-     * @param end
-     * @param workerID
-     * @return
+     * @param begin begin of the interval
+     * @param end end of the interval
+     * @param workerID worker of the shift
+     * @return list of shift from the interval
      */
     public List<Shift> findStartBetween(Timestamp begin, Timestamp end, Long workerID) {
         Connection connection = null;

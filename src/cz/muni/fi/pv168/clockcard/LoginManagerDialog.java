@@ -1,14 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * LoginManagerDialog.java
- *
- * Created on 5.5.2011, 17:33:59
- */
-
 package cz.muni.fi.pv168.clockcard;
 
 import java.awt.Frame;
@@ -19,8 +8,10 @@ import javax.swing.AbstractAction;
 import javax.swing.SwingWorker;
 
 /**
+ * Login Manager Dialog.
  *
- * @author Marek
+ * @author Marek Osvald
+ * @version 2011.0629
  */
 public class LoginManagerDialog extends javax.swing.JDialog {
 

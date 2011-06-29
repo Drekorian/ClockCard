@@ -1,20 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * WorkerForm.java
- *
- * Created on 3.5.2011, 12:30:22
- */
-
 package cz.muni.fi.pv168.clockcard;
 
 import cz.muni.fi.pv168.clockcard.ShiftsForm.ShiftTableModel;
 import java.awt.event.ActionEvent;
 import java.sql.Timestamp;
-import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
@@ -26,8 +14,10 @@ import javax.swing.JTable;
 import javax.swing.SwingWorker;
 
 /**
+ * Worker's control form.
  *
- * @author Fires
+ * @author David Stein
+ * @version 2011.0629
  */
 public class WorkerForm extends javax.swing.JFrame {
 
@@ -55,7 +45,6 @@ public class WorkerForm extends javax.swing.JFrame {
             jMenuItem3.setEnabled(true);
             jMenuItem4.setEnabled(false);
         }
-        System.out.println("zobrazuju okno3");
     }
 
     public static Worker getLogedWorker() {
@@ -184,8 +173,6 @@ public class WorkerForm extends javax.swing.JFrame {
             int year = now.get(GregorianCalendar.YEAR);
             Timestamp startTime = new Timestamp(new GregorianCalendar(year, month, firstDay).getTimeInMillis());
             Timestamp endTime = new Timestamp(new GregorianCalendar(year, month, lastDay).getTimeInMillis());
-            System.out.println(startTime.getTime());
-            System.out.println(endTime.getTime());
             List<Shift> shifts = (List<Shift>) ShiftManager.getInstance().findStartBetween(startTime,endTime,WorkerForm.getLogedWorker().getID());
             model.addShifts(shifts);
             model.fireTableDataChanged();
@@ -207,8 +194,6 @@ public class WorkerForm extends javax.swing.JFrame {
             int year = lastMonth.get(GregorianCalendar.YEAR);
             Timestamp startTime = new Timestamp(new GregorianCalendar(year, month, firstDay).getTimeInMillis());
             Timestamp endTime = new Timestamp(new GregorianCalendar(year, month, lastDay).getTimeInMillis());
-            System.out.println(startTime.getTime());
-            System.out.println(endTime.getTime());
             List<Shift> shifts = (List<Shift>) ShiftManager.getInstance().findStartBetween(startTime,endTime,WorkerForm.getLogedWorker().getID());
             model.addShifts(shifts);
             model.fireTableDataChanged();

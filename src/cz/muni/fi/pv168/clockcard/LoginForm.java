@@ -1,18 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * LoginForm.java
- *
- * Created on 3.5.2011, 12:25:04
- */
-
 package cz.muni.fi.pv168.clockcard;
 
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -21,7 +9,10 @@ import java.util.logging.SimpleFormatter;
 import javax.swing.AbstractAction;
 
 /**
- * @author Fires
+ * Login form
+ *
+ * @author David Stein
+ * @version 2011.0629
  */
 public class LoginForm extends javax.swing.JFrame {
 

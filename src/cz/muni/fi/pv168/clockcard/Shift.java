@@ -146,8 +146,10 @@ public class Shift implements IDatabaseStoreable {
         result = (updatedRows == 1);
 
         if (id == null) {
-            if (key != null && key.longValue() <= 0) {
-                id = key;
+            if (ShiftManager.getInstance().getLastGeneratedKey() != null &&
+                ShiftManager.getInstance().getLastGeneratedKey() > 0) {
+                id = ShiftManager.getInstance().getLastGeneratedKey();
+                ShiftManager.getInstance().deleteLastGeneratedKey();
             } else {
                 result = false;
                 LOGGER.log(Level.WARNING, CLASS_PROPERTIES.getProperty("log.keyGenerationFailed"));

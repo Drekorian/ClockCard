@@ -1,13 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * ManagerForm.java
- *
- * Created on 5.5.2011, 17:45:14
- */
 package cz.muni.fi.pv168.clockcard;
 
 import java.awt.event.ActionEvent;
@@ -21,8 +11,10 @@ import javax.swing.SwingWorker;
 import javax.swing.table.AbstractTableModel;
 
 /**
+ * Manager login form
  *
- * @author Marek
+ * @author Marek Osvald
+ * @version 2011.0629
  */
 public class ManagerForm extends javax.swing.JFrame {
 

@@ -1,19 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * AboutForm.java
- *
- * Created on 5.5.2011, 17:54:26
- */
-
 package cz.muni.fi.pv168.clockcard;
 
 /**
+ * About dialog.
  *
- * @author Marek
+ * @author Marek Osvald
+ * @version 2011.0629
  */
 public class AboutForm extends javax.swing.JFrame {
 

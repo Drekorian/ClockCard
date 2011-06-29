@@ -145,8 +145,10 @@ public class Worker implements IDatabaseStoreable {
         result = (updatedRows == 1);
 
         if (id == null) {
-            if (key != null && key.longValue() <= 0) {
+            if (WorkerManager.getInstance().getLastGeneratedKey() != null &&
+                WorkerManager.getInstance().getLastGeneratedKey() > 0) {
                 id = key;
+                WorkerManager.getInstance().deleteLastGeneratedKey();
             } else {
                 result = false;
                 LOGGER.log(Level.WARNING, CLASS_PROPERTIES.getProperty("log.keyGenerationFailed"));
@@ -460,9 +462,9 @@ public class Worker implements IDatabaseStoreable {
         return ShiftManager.getInstance().findByWorkerID(id);
     }
     /**
-     * TODO: Javadoc
+     * Return worker's shift from last month from the database.
      *
-     * @return
+     * @return worker's shifts from last month from the database
      */
     public List<Shift> getLastMonthShifts() {
         Calendar now = new GregorianCalendar();
@@ -474,9 +476,9 @@ public class Worker implements IDatabaseStoreable {
         return getShiftsByMonth(new GregorianCalendar(year, month, 1), new GregorianCalendar(year, month, daysInMonth));
     }
     /**
-     * TODO: Javadoc
+     * Return worker's shift from current month from the database.
      *
-     * @return
+     * @return worker's shifts from current month from the database
      */
     public List<Shift> getCurrentMonthShifts() {
         Calendar now = new GregorianCalendar();
@@ -487,10 +489,12 @@ public class Worker implements IDatabaseStoreable {
 
         return getShiftsByMonth(new GregorianCalendar(year, month, 1), new GregorianCalendar(year, month, daysInMonth));
     }
-
     /**
-     * Todo: Javadoc
-     * @return
+     * Returns worker's shifts from supplied interval from the database.
+     * 
+     * @param start start of an interval
+     * @param end end of an interval
+     * @return list of shift from the interval from the database
      */
     private List<Shift> getShiftsByMonth(Calendar start, Calendar end) {
         return ShiftManager.getInstance().findStartBetween(new Timestamp(start.getTimeInMillis()), new Timestamp(end.getTimeInMillis()));

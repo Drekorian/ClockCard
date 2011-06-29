@@ -1,8 +1,10 @@
 package cz.muni.fi.pv168.clockcard;
 
 /**
+ * Data holding the type and value of a SQL query parameter.
  *
- * @author Marek
+ * @author Marek Osvald
+ * @version 2011.0629
  */
 
 public class QueryParameter {
@@ -15,9 +17,10 @@ public class QueryParameter {
     private Object value;
 
     /**
-     * TODO: javadoc
-     * @param type
-     * @param value
+     * Parametric constructor. Sets the type and value of a parameter.
+     *
+     * @param type type of the parameter
+     * @param value value of the parameter
      */
     public QueryParameter(int type, Object value) {
         if (type < 0 || type > 3) {
@@ -27,20 +30,18 @@ public class QueryParameter {
         this.type = type;
         this.value = value;
     }
-
     /**
-     * TODO: javadoc
-     * @param type
-     * @param value
+     * Returns the type of the parameter.
+     *
+     * @return type of the parameter
      */
     public int getType() {
         return type;
     }
-
     /**
-     * TODO: javadoc
-     * @param type
-     * @param value
+     * Returns the value of the parameter.
+     * 
+     * @return value of the parameter
      */
     public Object getValue() {
         return value;

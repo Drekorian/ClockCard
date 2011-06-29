@@ -27,16 +27,15 @@ public class Supervisor implements IPropertyBased {
     private final Properties CLASS_PROPERTIES = loadProperties(CLASS_PROPERTY_FILE);
 
     /**
-     * TODO: javadoc
+     * Returns a singleton instance.
      *
-     * @return
+     * @return singleton instance
      */
     public static Supervisor getInstance() {
-        System.out.println("neco");
         if (instance == null) {
             instance = new Supervisor();
         }
-        System.out.println("odevzdavam instanci"+instance);
+        
         return instance;
     }
 
@@ -82,37 +81,40 @@ public class Supervisor implements IPropertyBased {
      * @return true is the passwords match, false otherwise
      */
     public boolean authenticate(String password) {
-        System.out.println("pred rozhodnutim2");
         if (password == null || password.equals("")) {
             throw new IllegalArgumentException("Password cannot be null or empty.");
         }
-        System.out.println("pred rozhodnutim3");
+        
         boolean result = CLASS_PROPERTIES.getProperty("password").equals(password);
-        System.out.println("pred rozhodnutim4");
+
         if (result) {
             LOGGER.log(Level.FINEST, CLASS_PROPERTIES.getProperty("log.correctAuthentication"));
         } else {
             LOGGER.log(Level.INFO, "{0} {1}.", new Object[]{ CLASS_PROPERTIES.getProperty("log.incorrectPassword"), password });
         }
-        System.out.println("pred rozhodnutim5");
+        
         return result;
     }
     /**
-     * TODO: Javadoc me;
+     * Returns all shifts from the database.
+     *
+     * @return all shifts from the database
      */
     public List<Shift> getAllShifts() {
         return ShiftManager.getInstance().getAll();
     }
     /**
-     * TODO: Javadoc me.
+     * Returns all workers from the database.
+     * 
+     * @return all workers from the database
      */
     public List<Worker> getAllWorkers() {
         return WorkerManager.getInstance().getAll();
     }
     /**
-     * TODO: Javadoc
+     * Returns all shifts from last month from the database.
      *
-     * @return
+     * @return all shifts from last month from the database.
      */
     public List<Shift> getLastMonthShifts() {
         Calendar now = new GregorianCalendar();
@@ -124,9 +126,9 @@ public class Supervisor implements IPropertyBased {
         return getShiftsByMonth(new GregorianCalendar(year, month, 1), new GregorianCalendar(year, month, daysInMonth));
     }
     /**
-     * TODO: Javadoc
+     * Returns all shifts from current month from the database
      *
-     * @return
+     * @return all shifts from current month from the database
      */
     public List<Shift> getCurrentMonthShifts() {
         Calendar now = new GregorianCalendar();
@@ -139,11 +141,11 @@ public class Supervisor implements IPropertyBased {
     }
 
     /**
-     * TODO: Javadoc
+     * Retuns shifts from specified time interval from the database.
      *
-     * @param start
-     * @param end
-     * @return
+     * @param start start of an interval
+     * @param end end of an interval
+     * @return list of all shoft from the interval
      */
     private List<Shift> getShiftsByMonth(Calendar start, Calendar end) {
         return ShiftManager.getInstance().findStartBetween(

@@ -58,13 +58,13 @@ public class ShiftTest {
         } catch (SQLException ex) {
             fail("Unable to reset tables.");
         }
-
+        
         Worker firstWorker = WorkerManager.getInstance().find(1);
         Shift newShift = new Shift(firstWorker.getID());
         assertNull("Newly created shift should not have an ID", newShift.getID());
         newShift.save();
         assertNotNull(newShift.getID());
-
+        
         Shift shift = newShift;
         Calendar oldEnd = shift.getEnd();
         shift.setEnd(new GregorianCalendar());

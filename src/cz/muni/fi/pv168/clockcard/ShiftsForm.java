@@ -1,16 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * ShiftsForm.java
- *
- * Created on 5.5.2011, 17:39:26
- */
 package cz.muni.fi.pv168.clockcard;
 
-import cz.muni.fi.pv168.clockcard.Shift;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +10,10 @@ import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
 /**
+ * For for viewing shifts.
  *
- * @author Marek
+ * @author Marek Osvald
+ * @version 2011.0629
  */
 public class ShiftsForm extends javax.swing.JFrame {
 
@@ -105,7 +96,6 @@ public class ShiftsForm extends javax.swing.JFrame {
 
         public void addShifts(List<Shift> shift) {
             for(Shift sh: shift){
-                System.out.println(sh.getID());
                 shifts.add(sh);
             }
             fireTableStructureChanged();

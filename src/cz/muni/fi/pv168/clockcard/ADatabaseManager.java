@@ -26,6 +26,7 @@ public abstract class ADatabaseManager implements IPropertyBased {
 
     private DataSource dataSource;
     private boolean testingMode = false;
+    private Long lastGeneratedKey = null;
 
     /**
      * Non-parametric constructor. Sets manager's data source to production mode.
@@ -121,6 +122,20 @@ public abstract class ADatabaseManager implements IPropertyBased {
     public DataSource getDataSource() {
         return dataSource;
     }
+    /**
+     * Returns last generated key.
+     *
+     * @return last generated key.
+     */
+    public Long getLastGeneratedKey() {
+        return lastGeneratedKey;
+    }
+    /**
+     * Deletes last generated key.
+     */
+    public void deleteLastGeneratedKey() {
+        lastGeneratedKey = null;
+    }
 
     /**
      * Returns new DataSource representing a connection to the testing database.
@@ -150,9 +165,10 @@ public abstract class ADatabaseManager implements IPropertyBased {
     }
 
     /**
-     * TODO: javadoc
-     * @param preparedStatement
-     * @param params
+     * Fills arguments of prepared statements with given QueryParameters.
+     *
+     * @param preparedStatement PrepareStatement to update.
+     * @param params parameters to update the statement with
      * @throws SQLException
      */
     private void processQueryParameters(PreparedStatement preparedStatement, List<QueryParameter> params) throws SQLException {
@@ -191,10 +207,12 @@ public abstract class ADatabaseManager implements IPropertyBased {
     }
 
     /**
-     * TODO: Javadoc
+     * Executes SQL query.
      *
-     * @param params
-     * @return
+     * @param connection connection to run the query in
+     * @param query query to run
+     * @param params params to run the query with
+     * @return result of the query
      */
     protected ResultSet executeQuery(Connection connection, String query, List<QueryParameter> params) throws SQLException {
         if (connection == null) {
@@ -224,20 +242,22 @@ public abstract class ADatabaseManager implements IPropertyBased {
         return result;
     }
     /**
-     * TODO: javadoc
+     * Executes SQL query with no parameters.
      *
-     * @param connection
-     * @param query
-     * @return
+     * @param connection connection to run the query in
+     * @param query query to run
+     * @return result of the query
      */
     protected ResultSet executeQuery(Connection connection, String query) throws SQLException {
         return executeQuery(connection, query, new ArrayList<QueryParameter>());
     }
     /**
-     * TODO: Javadoc
+     * Executes SQL UPDATE query.
      *
-     * @param params
-     * @return
+     * @param connection connection to run the query in
+     * @param query query to run
+     * @param params params to run the query with
+     * @return result of the query
      */
     protected int executeUpdate(Connection connection, String query, List<QueryParameter> params, Long key) throws SQLException {
         if (connection == null) {
@@ -270,26 +290,26 @@ public abstract class ADatabaseManager implements IPropertyBased {
         if (key != null) {
             ResultSet keys = preparedStatement.getGeneratedKeys();
             if (keys.next()) {
-                key = keys.getLong(1);
+                lastGeneratedKey = keys.getLong(1);
             }
         }
     
         return result;
     }
     /**
-     * TODO: javadoc
+     * Executes SQL UPDATE query with no parameter
      *
-     * @param connection
-     * @param query
-     * @return
+     * @param connection connection to run the query in
+     * @param query query to run
+     * @return result of the query
      */
     protected int executeUpdate(Connection connection, String query, List<QueryParameter> params) throws SQLException {
         return executeUpdate(connection, query, params, null);
     }
-
     /**
-     * TODO: javadoc
-     * @return
+     * Opens a connection.
+     * 
+     * @return connection datasource, provided that opening is successful, null otherwise
      */
     public Connection openConnection() {
         Connection result = null;
@@ -304,9 +324,9 @@ public abstract class ADatabaseManager implements IPropertyBased {
         return result;
     }
     /**
-     * TODO: JAVADOC
+     * Severes the connection
      * 
-     * @param connection
+     * @param connection connection to severe
      */
     public void terminateConnection(Connection connection) {
         if (connection != null) {
